@@ -1,0 +1,56 @@
+{
+  "name": "Simple Hallway",
+  "version": "1.0.0",
+
+  "rooms":[
+    { "room_name":"Hallway 1", "room_number": "1",
+      "description":"You're standing in first part of a long hallway. The only direction forward is to the north.\nAn immense painting hangs on the wall. \nThere are a few items and fixtures here. Look around and see if your code can examine and manipulate them\nTry taking the notebook and examining the painting.",
+      "N": "2", "S": "0", "E": "0", "W": "0","puzzle": null, "monster": null, "items": "Notebook", "fixtures": "Painting","picture": null },
+    { "room_name":"Hallway 2", "room_number": "2",
+      "description":"This second 'room' is part of the hallway. There is a door to the north. it is now unlocked since you used the key to deactivate the puzzle. Take the hair clippers - you'll need them.",
+      "N": "-3", "S": "1", "E": "0", "W": "0","puzzle": "Lock", "monster": null, "items": "Key, Hair Clippers", "fixtures": "Chandelier", "picture": null },
+    { "room_name":"Hallway End", "room_number": "3",
+      "description":"Just another room. There's a monster here that you defeated with the hair clippers. Try dropping one of your items here, and ensure your inventory is updating properly.",
+      "N": "4", "S": "2", "E": "0", "W": "0","puzzle": null, "monster": "Teddy Bear", "items": "Lamp", "fixtures": null, "picture": null },
+    { "room_name":"Exercise Room", "room_number": "4",
+      "description":"Looks like an exercise room with a bunch of weight equipment. There's a treadmill (fixture) here. Want to take a quick jog?\nYou can't move fixtures, and note that when PUZZLES affect the environment, you won't see items either.",
+      "N": "0", "S": "3", "E": "0", "W": "0","puzzle": "DARKNESS", "monster": null, "items": "Candybar", "fixtures": "Treadmill", "picture": null }
+  ],
+  "items":[
+    { "name":"Lamp", "weight": "3", "max_uses": "100", "uses_remaining": "2", "value" : "100", "when_used" : "You light the lamp with the flint.",
+      "description":"An old oil lamp with flint to spark.", "picture": null },
+    { "name":"Hair Clippers", "weight": "2", "max_uses": "10", "uses_remaining": "4", "value" : "5","when_used" : "You activate the clippers. It makes a loud buzzing sound as you use them!",
+      "description":"Cordless Wahl hair clippers for pets or humans. The battery low light is blinking.", "picture": null },
+    { "name":"Key", "weight": "1", "max_uses": "3", "uses_remaining": "3", "value" : "5", "when_used" : "You insert the key and turn it. 'Click!'",
+      "description":"A medium-sized key. Looks like it may unlock a cabinet or desk.", "picture": null },
+    { "name":"Notebook", "weight": "1", "max_uses": "1000", "uses_remaining": "1000", "value" : "100", "when_used" : "You read the notebook.",
+      "description":"It's a developer's notebook. Some tips:\nKeep in mind that puzzles and monsters alter the room environment until they are deactivated\nYou CANNOT examine monsters, but you CAN examine fixtures and items. Items solve puzzles and defeat monsters.",
+      "picture": null },
+    { "name":"Candybar", "weight": "1", "max_uses": "1", "uses_remaining": "1", "value" : "100", "when_used" : "Crunch crunch crunch. Yum! That was good",
+      "description":"Some items that are not targeted at some puzzle or monster have a when_used string,\nbut it's not activated (like this candy bar) unless the story links it to something significant.",
+      "picture": null }
+  ],
+  "fixtures":[
+    { "name":"Painting", "weight": "1000", "puzzle":null, "states" : null,
+      "description":"A rather large and spooky painting of Dracula. Yikes. Are we in a horror game?", "picture": null },
+    { "name":"Treadmill", "weight": "1000", "puzzle":null, "states" : null,
+      "description":"A PreCore 5598XPS Treadmill. State of the art. Do you want to take a quick jog?", "picture": null }
+
+  ],
+  "monsters":[
+    { "name":"Teddy Bear", "active": "true", "affects_target":"true", "affects_player": "true", "solution" : "Hair Clippers", "value" : "200",
+      "description" : "A peaceful, cute-looking teddy bear with its hair clipped sits on the floor",
+      "effects" : "A monster Teddy Bear growls at you! You cannot get past!", "damage" : "-5",
+      "target" : "3:Hallway End", "can_attack": "true", "attack":"hits you with soft, fluffy paws! You might sneeze!", "picture": null }
+  ],
+  "puzzles":[
+    { "name":"LOCK", "active": "true", "affects_target":"true", "affects_player": "false", "solution" : "Key", "value" : "150",
+      "description" : "A lock on the door facing north.",
+      "effects" : "There is a door to the north. it is locked and preventing you from moving forward.\nIs there something in the room that could help you?",
+      "target" : "2:Hallway 2", "picture": null },
+    { "name":"DARKNESS", "active": "true", "affects_target":"true", "affects_player": "true", "solution" : "Lamp", "value" : "150",
+      "description" : "Darkness! You cannot see!",
+      "effects" : "It's dark! You cannot see anything! Maybe we should go back?",
+      "target" : "4:Exercise Room", "picture": null }
+  ]
+}

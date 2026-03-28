@@ -1,0 +1,17 @@
+{
+  "name": "Empty Rooms with Missing Data",
+  "version": "1.0.0",
+
+  "rooms":[
+    { "room_name":"Hallway 1", "room_number": "1",
+      "description":"First Room. The only direction forward is to the north.\nUse this data file to test robustness if data specifies a missing item or element.\nYour program should handle it gracefully.",
+      "N": "2", "S": "0", "E": "0", "W": "0","puzzle": null, "monster": "Teddy Bear", "items": "Lamp", "fixtures": null,"picture": null },
+    { "room_name":"Hallway 2", "room_number": "2",
+      "description":"This second 'room' is part of the hallway. The rooms in this file are empty. Use this as a simple test case to ensure you can 'walk around'. Keep going North.",
+      "N": "3", "S": "1", "E": "0", "W": "0","puzzle": null, "monster": null, "items": null, "fixtures": "Painting", "picture": null },
+    { "room_name":"Hallway End", "room_number": "3",
+      "description":"Just another room. This is the end of the line. Go south to return to your starting point.",
+      "N": "0", "S": "2", "E": "0", "W": "0","puzzle": "Lock", "monster": null, "items": null, "fixtures": "Desk", "picture": null }
+  ]
+
+}

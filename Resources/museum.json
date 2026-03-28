@@ -1,0 +1,38 @@
+{
+  "name": "Museum of Planet of the Apes",
+  "version": "1.0.0",
+
+  "rooms":[
+    { "room_name":"Museum Entrance", "room_number": "1",
+      "description":"You're standing at the entrance of the Museum of Natural History. There's a turnstile that takes tickets, but it's already been activated and opened.",
+      "N": "-2", "S": "0", "E": "0", "W": "0","puzzle": "Turnstile", "monster": null, "items": "Ticket", "fixtures": null, "picture": "museum.png" },
+    { "room_name":"First Exhibit", "room_number": "2",
+      "description":"This first exhibit shows the battle for earth, with the ape Caesar defeating the humans",
+      "N": "-3", "S": "1", "E": "0", "W": "0","puzzle": "Password", "monster": null, "items": null, "fixtures": "Computer", "picture": "exhibit-1.png" },
+    { "room_name":"Second Exhibit", "room_number": "3",
+      "description":"Astronauts Taylor, Landon and Dodge are shown speaking to the ape scientist Cornelius.\n Odd. Humans can speak?",
+      "N": "4", "S": "2", "E": "0", "W": "0","puzzle": null, "monster": null, "items": null, "fixtures": null, "picture": "exhibit-2.png" },
+    { "room_name":"Third Exhibit", "room_number": "4",
+      "description":"There is a museum worker here. It looks like they are refreshing the exhibit.\n'Pay no attention - this is the reboot-the-franchise exhibit'.",
+      "N": "2", "S": "3", "E": "0", "W": "0","puzzle": null, "monster": null, "items": null, "fixtures": null, "picture": "exhibit-3.png" }
+  ],
+  "items":[
+   { "name":"Ticket", "weight": "1", "max_uses": "1", "uses_remaining": "1", "value" : "5", "when_used" : "You insert the ticket. 'Swish! Beep!'",
+      "description":"A complimentary museum ticket. It says ADMIT ONE, pwd = Align.", "picture": null }
+  ],
+  "fixtures":[
+    { "name":"Computer", "weight": "1000", "puzzle":null, "states" : null,
+      "description":"A computer with a password screen active.", "picture": null }
+    ],
+
+  "puzzles":[
+    { "name":"TURNSTILE", "active": "true", "affects_target":"true", "affects_player": "false", "solution" : "Ticket", "value" : "150",
+      "description" : "The turnstile to the north is blocking your entrance to the exhibits.",
+      "effects" : "There is a turnstile to the north. It requires some type of payment or ticket to activate.",
+      "target" : "1:Museum Entrance", "picture": null },
+    { "name":"PASSWORD", "active": "true", "affects_target":"true", "affects_player": "false", "solution" : "'Align'", "value" : "150",
+      "description" : "A computer with a password screen.",
+      "effects" : "A computer that seems to control an invisible forcefield blocking your motion. A password screen is waiting for an entry.",
+      "target" : "2:First Exhibit", "picture": null }
+  ]
+}
