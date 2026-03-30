@@ -36,7 +36,7 @@ public class Monster {
         return name; 
     }
 
-    public boolean isActive()      { 
+    public boolean isActive() { 
         return active; 
     }
 
