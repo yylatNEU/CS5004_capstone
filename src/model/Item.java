@@ -15,6 +15,7 @@ public class Item {
   private final int value;
   private final String whenUsed;
   private final String description;
+  private final String picture;
 
   /**
    * Constructs an Item with the given attributes.
@@ -26,11 +27,12 @@ public class Item {
    * @param value         the point value of this item for scoring
    * @param whenUsed      the text displayed when the item is successfully used
    * @param description   the text displayed when the item is examined
+   * @param picture       the filename of an associated image, or null
    * @throws IllegalArgumentException if name is null or blank, weight is negative,
    *     maxUses is negative, or usesRemaining is out of range
    */
   public Item(String name, int weight, int maxUses, int usesRemaining,
-      int value, String whenUsed, String description) {
+      int value, String whenUsed, String description, String picture) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException("Item name cannot be null or blank.");
     }
@@ -51,6 +53,7 @@ public class Item {
     this.value = value;
     this.whenUsed = whenUsed;
     this.description = description;
+    this.picture = picture;
   }
 
   /**
@@ -114,6 +117,15 @@ public class Item {
    */
   public String getDescription() {
     return description;
+  }
+
+  /**
+   * Returns the picture filename associated with this item, or null.
+   *
+   * @return the picture filename, or null if none
+   */
+  public String getPicture() {
+    return picture;
   }
 
   /**

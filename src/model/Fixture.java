@@ -13,6 +13,9 @@ public class Fixture {
   private final String name;
   private final int weight;
   private final String description;
+  private final String puzzle;
+  private final String states;
+  private final String picture;
 
   /**
    * Constructs a Fixture with the given attributes.
@@ -20,10 +23,14 @@ public class Fixture {
    * @param name        the name of this fixture
    * @param weight      how much this fixture weighs (typically 1000+)
    * @param description the text displayed when the fixture is examined
+   * @param puzzle      the name of an associated puzzle, or null
+   * @param states      the state model descriptor, or null
+   * @param picture     the filename of an associated image, or null
    * @throws IllegalArgumentException if name is null or blank,
    *     or weight is negative
    */
-  public Fixture(String name, int weight, String description) {
+  public Fixture(String name, int weight, String description,
+      String puzzle, String states, String picture) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException(
           "Fixture name cannot be null or blank.");
@@ -34,6 +41,9 @@ public class Fixture {
     this.name = name;
     this.weight = weight;
     this.description = description;
+    this.puzzle = puzzle;
+    this.states = states;
+    this.picture = picture;
   }
 
   /**
@@ -61,6 +71,33 @@ public class Fixture {
    */
   public String getDescription() {
     return description;
+  }
+
+  /**
+   * Returns the name of the puzzle associated with this fixture, or null.
+   *
+   * @return the puzzle name, or null if none
+   */
+  public String getPuzzle() {
+    return puzzle;
+  }
+
+  /**
+   * Returns the state model descriptor for this fixture, or null.
+   *
+   * @return the states descriptor, or null if none
+   */
+  public String getStates() {
+    return states;
+  }
+
+  /**
+   * Returns the picture filename associated with this fixture, or null.
+   *
+   * @return the picture filename, or null if none
+   */
+  public String getPicture() {
+    return picture;
   }
 
   /**
