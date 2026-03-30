@@ -9,7 +9,7 @@ import java.util.Map;
 public class GameWorld {
   private String gameName;
   private String version;
-  private final Map<Integer, Room>   rooms    = new HashMap<>();
+  private static final Map<Integer, Room>   rooms    = new HashMap<>();
   private final Map<String, Item>    items    = new HashMap<>();
   private final Map<String, Fixture> fixtures = new HashMap<>();
   private final Map<String, Puzzle>  puzzles  = new HashMap<>();
@@ -93,7 +93,7 @@ public class GameWorld {
    * @param roomNumber room num
    * @return room
    */
-  public Room getRoom(int roomNumber) {
+  public static Room getRoom(int roomNumber) {
     return rooms.get(roomNumber);
   }
 

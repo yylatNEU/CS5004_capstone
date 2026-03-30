@@ -1,25 +1,24 @@
 package model;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Room {
-	public enum Direction {
-		NORTH, SOUTH, EAST, WEST
-	}
 	private int roomNumber;
 	private String roomName;
 	private String description;
 	private Map<Direction, Integer> exits;
 	private String picture;
-	private Item item;
+	private List<Item> items;
 	private Puzzle puzzle;
 	private Monster monster;
 	
-	private Fixture fixture;
+	private List<Fixture> fixture;
 	
-	public Room(roomNumber, roomName, description,
-													 exits, picture){
+	public Room(int roomNumber, String roomName, String description,
+													 Map<Direction, Integer> exits, String picture){
 		this.roomNumber = roomNumber;
 		this.roomName = roomName;
 		this.description = description;
@@ -32,21 +31,15 @@ public class Room {
 		this.description = room.description;
 		this.exits = room.exits;
 		this.picture = room.picture;
-		this.item = room.item;
+		this.items = room.items;
 		this.puzzle = room.puzzle;
 		this.monster = room.monster;
-	}
-	public Room(Item item) {
-		this.item = item;
 	}
 	public Room(Puzzle puzzle) {
 		this.puzzle = puzzle;
 	}
 	public Room(Monster monster) {
 		this.monster = monster;
-	}
-	public Room(Fixture fixture) {
-		this.fixture = fixture;
 	}
 	public int getRoomNumber() {
 		return roomNumber;
@@ -57,7 +50,7 @@ public class Room {
 	public String getDescription() {
 		return description;
 	}
-	public void setExits(Direction direction, int destination) {
+	public void setExit(Direction direction, int destination) {
 		exits.put(direction, destination);
 	}
 	public int getExit(Direction direction) {
@@ -71,8 +64,44 @@ public class Room {
 	}
 	public Room transition(Direction direction) {
 		if(passable(direction)) {
-			return GameWorld.getInstance().getRoom(exits.get(direction));
+			Room destination = GameWorld.getRoom(exits.get(direction));
+			return destination;
 		}
 		return null;
+	}
+	public Map<Direction, Integer> getExits() {
+		return exits;
+	}
+	
+	public void addItem(Item item) {
+		if(items == null) {
+			items = new ArrayList<>();
+		}
+		this.items.add(item);
+	}
+	
+	public void removeItem(Item item) {
+		if(items != null) {
+			this.items.remove(item);
+		}
+	}
+	public List<Item> getItems() {
+		return items;
+	}
+	public void setMonster(Monster monster) {
+		this.monster = monster;
+	}
+	public void setPuzzle(Puzzle puzzle) {
+		this.puzzle = puzzle;
+	}
+	public Puzzle getPuzzle() {
+		return puzzle;
+	}
+	
+	public void addFixture(Fixture fixture) {
+		if(this.fixture == null) {
+			this.fixture = new ArrayList<>();
+		}
+		this.fixture.add(fixture);
 	}
 }
