@@ -129,6 +129,21 @@ public class Item {
   }
 
   /**
+   * Sets the remaining uses for this item.
+   * Used when restoring a saved game to recover previous state.
+   *
+   * @param uses the number of uses to set (0 to maxUses)
+   * @throws IllegalArgumentException if uses is out of range
+   */
+  public void setUsesRemaining(int uses) {
+    if (uses < 0 || uses > maxUses) {
+      throw new IllegalArgumentException(
+          "Uses remaining must be between 0 and maxUses.");
+    }
+    this.usesRemaining = uses;
+  }
+
+  /**
    * Checks whether this item can still be used (has remaining uses).
    *
    * @return true if usesRemaining is greater than zero
