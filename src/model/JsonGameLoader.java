@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Reads a JSON game file and constructs/saves data in GameWorld.
@@ -58,13 +56,14 @@ public class JsonGameLoader {
       try {
         JSONObject o = arr.getJSONObject(i);
         Item item = new Item(
-                getString(o, "name",            "Unknown Item"),
-                getInt   (o, "weight",          0),
-                getInt   (o, "max_uses",        1),
-                getInt   (o, "uses_remaining",  1),
-                getInt   (o, "value",           0),
-                getString(o, "when_used",       "You use the item."),
-                getString(o, "description",     "No description available.")
+                getString(o, "name", "Unknown Item"),
+                getInt   (o, "weight", 0),
+                getInt   (o, "max_uses", 1),
+                getInt   (o, "uses_remaining", 1),
+                getInt   (o, "value", 0),
+                getString(o, "when_used", "You use the item."),
+                getString(o, "description", "No description available."),
+                getString(o, "picture", "null")
         );
         world.addItem(item);
       } catch (Exception e) {
@@ -92,9 +91,12 @@ public class JsonGameLoader {
       try {
         JSONObject o = arr.getJSONObject(i);
         Fixture fixture = new Fixture(
-                getString(o, "name",        "Unknown Fixture"),
-                getInt   (o, "weight",      1000),
-                getString(o, "description", "No description available.")
+                getString(o, "name", "Unknown Fixture"),
+                getInt   (o, "weight", 1000),
+                getString(o, "description", "No description available."),
+                getString(o, "picture", "null"),
+                getString(o, "puzzle", "null"),
+                getString(o, "status", "null")
         );
         world.addFixture(fixture);
       } catch (Exception e) {
@@ -122,15 +124,15 @@ public class JsonGameLoader {
       try {
         JSONObject o = arr.getJSONObject(i);
         Puzzle puzzle = new Puzzle(
-                getString(o, "name",           "Unknown Puzzle"),
-                getBoolean(o, "active",        true),
-                getBoolean(o, "affects_target",true),
-                getBoolean(o, "affects_player",false),
-                getString(o, "solution",       ""),
-                getInt   (o, "value",          0),
-                getString(o, "description",    "No description available."),
-                getString(o, "effects",        "Something is blocking you."),
-                getString(o, "target",         "")
+                getString(o, "name", "Unknown Puzzle"),
+                getBoolean(o, "active", true),
+                getBoolean(o, "affects_target", true),
+                getBoolean(o, "affects_player", false),
+                getString(o, "solution", ""),
+                getInt   (o, "value", 0),
+                getString(o, "description", "No description available."),
+                getString(o, "effects", "Something is blocking you."),
+                getString(o, "target", "")
         );
         world.addPuzzle(puzzle);
       } catch (Exception e) {
@@ -158,18 +160,18 @@ public class JsonGameLoader {
       try {
         JSONObject o = arr.getJSONObject(i);
         Monster monster = new Monster(
-                getString(o, "name",           "Unknown Monster"),
-                getBoolean(o, "active",        true),
-                getBoolean(o, "affects_target",true),
-                getBoolean(o, "affects_player",true),
-                getString(o, "solution",       ""),
-                getInt   (o, "value",          0),
-                getString(o, "description",    "No description available."),
-                getString(o, "effects",        "A monster blocks your path!"),
-                getInt   (o, "damage",         0),
-                getString(o, "target",         ""),
-                getBoolean(o, "can_attack",    false),
-                getString(o, "attack",         "")
+                getString(o, "name", "Unknown Monster"),
+                getBoolean(o, "active", true),
+                getBoolean(o, "affects_target", true),
+                getBoolean(o, "affects_player", true),
+                getString(o, "solution", ""),
+                getInt   (o, "value", 0),
+                getString(o, "description", "No description available."),
+                getString(o, "effects", "A monster blocks your path!"),
+                getInt   (o, "damage", 0),
+                getString(o, "target", ""),
+                getBoolean(o, "can_attack", false),
+                getString(o, "attack", "")
         );
         world.addMonster(monster);
       } catch (Exception e) {
@@ -199,20 +201,17 @@ public class JsonGameLoader {
         JSONObject o = arr.getJSONObject(i);
 
         int    roomNumber = getInt   (o, "room_number", 0);
-        String roomName   = getString(o, "room_name",   "Unknown Room");
+        String roomName   = getString(o, "room_name", "Unknown Room");
         String description= getString(o, "description", "An empty room.");
         int    north      = getInt   (o, "N", 0);
         int    south      = getInt   (o, "S", 0);
         int    east       = getInt   (o, "E", 0);
         int    west       = getInt   (o, "W", 0);
-        String picture    = getString(o, "picture",     null);
-        Map<Direction, Integer> exits = new HashMap<>();
+        String picture    = getString(o, "picture", null);
+
         Room room = new Room(roomNumber, roomName, description,
-                exits, picture);
-        exits.put(Direction.NORTH, north);
-        exits.put(Direction.SOUTH, south);
-        exits.put(Direction.EAST,  east);
-        exits.put(Direction.WEST,  west);
+                north, south, east, west, picture);
+
         String itemNames = getString(o, "items", null);
         if (itemNames != null) {
           for (String name : splitNames(itemNames)) {

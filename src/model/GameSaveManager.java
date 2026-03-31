@@ -151,10 +151,10 @@ public class GameSaveManager {
       }
       JSONObject obj = new JSONObject();
       obj.put("roomNumber", room.getRoomNumber());
-      obj.put("N", room.getExit(Room.Direction.NORTH));
-      obj.put("S", room.getExit(Room.Direction.SOUTH));
-      obj.put("E", room.getExit(Room.Direction.EAST));
-      obj.put("W", room.getExit(Room.Direction.WEST));
+      obj.put("N", room.getExit(Direction.NORTH));
+      obj.put("S", room.getExit(Direction.SOUTH));
+      obj.put("E", room.getExit(Direction.EAST));
+      obj.put("W", room.getExit(Direction.WEST));
       // TODO: needs Room.getItems() to record which items are in each room
       arr.put(obj);
     }
@@ -272,10 +272,10 @@ public class GameSaveManager {
       if (room == null) {
         continue;
       }
-      room.setExits(Room.Direction.NORTH, obj.getInt("N"));
-      room.setExits(Room.Direction.SOUTH, obj.getInt("S"));
-      room.setExits(Room.Direction.EAST, obj.getInt("E"));
-      room.setExits(Room.Direction.WEST, obj.getInt("W"));
+      room.setExit(Direction.NORTH, obj.getInt("N"));
+      room.setExit(Direction.SOUTH, obj.getInt("S"));
+      room.setExit(Direction.EAST, obj.getInt("E"));
+      room.setExit(Direction.WEST, obj.getInt("W"));
     }
   }
 

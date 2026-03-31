@@ -138,6 +138,30 @@ public class GameWorld {
   }
 
   /**
+   * Returns all items in the world.
+   * @return items map
+   */
+  public Map<String, Item> getAllItems() {
+    return java.util.Collections.unmodifiableMap(items);
+  }
+
+  /**
+   * Returns all puzzles in the world.
+   * @return puzzles map
+   */
+  public Map<String, Puzzle> getAllPuzzles() {
+    return java.util.Collections.unmodifiableMap(puzzles);
+  }
+
+  /**
+   * Returns all monsters.
+   * @return monsters map
+   */
+  public Map<String, Monster> getAllMonsters() {
+    return java.util.Collections.unmodifiableMap(monsters);
+  }
+
+  /**
    * Get starting room.
    * @return starting room
    */
