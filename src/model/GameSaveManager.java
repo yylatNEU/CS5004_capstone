@@ -38,7 +38,7 @@ public class GameSaveManager {
     root.put("score", player.getScore());
     root.put("currentRoom", player.getCurrentRoomNumber());
 
-    root.put("inventory", buildInventoryArray(player));
+    root.put("inventory", buildInventoryArray(player, world));
     root.put("items", buildItemStatesArray(world));
     root.put("puzzles", buildPuzzleStates(world));
     root.put("monsters", buildMonsterStates(world));
@@ -84,9 +84,9 @@ public class GameSaveManager {
    * Builds a JSON array of items currently in the player's inventory.
    * Each entry records the item name and its remaining uses.
    */
-  private JSONArray buildInventoryArray(Player player) {
+  private JSONArray buildInventoryArray(Player player, GameWorld world) {
     JSONArray arr = new JSONArray();
-    List<Item> items = getInventoryItems(player);
+    List<Item> items = getInventoryItems(player, world);
     for (Item item : items) {
       JSONObject obj = new JSONObject();
       obj.put("name", item.getName());
@@ -102,15 +102,11 @@ public class GameSaveManager {
    */
   private JSONArray buildItemStatesArray(GameWorld world) {
     JSONArray arr = new JSONArray();
-    // TODO: needs GameWorld.getAllItems() or similar method from Matt
-    // For now, we save item states that we can access through rooms
-    for (int roomNum = 1; roomNum <= world.getRoomCount(); roomNum++) {
-      Room room = world.getRoom(roomNum);
-      if (room == null) {
-        continue;
-      }
-      // TODO: needs Room.getItems() from John — currently Room only
-      // has a single Item field without a public getter
+    for (Item item : world.getAllItems().values()) {
+      JSONObject obj = new JSONObject();
+      obj.put("name", item.getName());
+      obj.put("usesRemaining", item.getUsesRemaining());
+      arr.put(obj);
     }
     return arr;
   }
@@ -120,9 +116,9 @@ public class GameSaveManager {
    */
   private JSONObject buildPuzzleStates(GameWorld world) {
     JSONObject obj = new JSONObject();
-    // TODO: needs GameWorld.getAllPuzzles() from Matt
-    // When available, iterate and record:
-    // obj.put(puzzle.getName(), puzzle.isActive());
+    for (Puzzle puzzle : world.getAllPuzzles().values()) {
+      obj.put(puzzle.getName(), puzzle.isActive());
+    }
     return obj;
   }
 
@@ -131,9 +127,9 @@ public class GameSaveManager {
    */
   private JSONObject buildMonsterStates(GameWorld world) {
     JSONObject obj = new JSONObject();
-    // TODO: needs GameWorld.getAllMonsters() from Matt
-    // When available, iterate and record:
-    // obj.put(monster.getName(), monster.isActive());
+    for (Monster monster : world.getAllMonsters().values()) {
+      obj.put(monster.getName(), monster.isActive());
+    }
     return obj;
   }
 
@@ -155,7 +151,14 @@ public class GameSaveManager {
       obj.put("S", room.getExit(Direction.SOUTH));
       obj.put("E", room.getExit(Direction.EAST));
       obj.put("W", room.getExit(Direction.WEST));
-      // TODO: needs Room.getItems() to record which items are in each room
+      JSONArray roomItemNames = new JSONArray();
+      List<Item> roomItems = room.getItems();
+      if (roomItems != null) {
+        for (Item item : roomItems) {
+          roomItemNames.put(item.getName());
+        }
+      }
+      obj.put("items", roomItemNames);
       arr.put(obj);
     }
     return arr;
@@ -209,9 +212,6 @@ public class GameSaveManager {
   private void restoreInventory(JSONArray invArr, Player player,
       GameWorld world) {
     Inventory bag = player.getInventory();
-    // TODO: needs Inventory.clear() from Vanessa, or we manually
-    // remove each item. Since the player is newly constructed,
-    // the inventory starts empty, so no clearing needed here.
     for (int i = 0; i < invArr.length(); i++) {
       JSONObject obj = invArr.getJSONObject(i);
       String name = obj.getString("name");
@@ -236,9 +236,6 @@ public class GameSaveManager {
       if (puzzle != null && !active) {
         puzzle.deactivate();
       }
-      // TODO: if a puzzle was active in save but currently
-      // deactivated, we would need puzzle.activate() or
-      // puzzle.setActive(true) from Jackson
     }
   }
 
@@ -254,8 +251,6 @@ public class GameSaveManager {
       if (monster != null && !active) {
         monster.deactivate();
       }
-      // TODO: same as puzzle — need monster.setActive(true) from
-      // Jackson if we need to re-activate a monster
     }
   }
 
@@ -276,6 +271,22 @@ public class GameSaveManager {
       room.setExit(Direction.SOUTH, obj.getInt("S"));
       room.setExit(Direction.EAST, obj.getInt("E"));
       room.setExit(Direction.WEST, obj.getInt("W"));
+
+      List<Item> currentItems = room.getItems();
+      if (currentItems != null) {
+        for (Item item : new ArrayList<>(currentItems)) {
+          room.removeItem(item);
+        }
+      }
+      JSONArray savedItems = obj.optJSONArray("items");
+      if (savedItems != null) {
+        for (int j = 0; j < savedItems.length(); j++) {
+          Item item = world.getItem(savedItems.getString(j));
+          if (item != null) {
+            room.addItem(item);
+          }
+        }
+      }
     }
   }
 
@@ -283,17 +294,22 @@ public class GameSaveManager {
 
   /**
    * Extracts the list of items from a player's inventory.
-   * Works around the lack of a direct getItems() method by
-   * checking known item names from the world.
    *
-   * <p>TODO: Replace this with Inventory.getItems() once Vanessa
-   * adds that method. For now this is a placeholder that returns
-   * an empty list — the real implementation needs the full item
-   * list from Inventory.</p>
+   * <p>TODO: Replace with Inventory.getItems() once Vanessa adds
+   * that method. Current workaround checks all world items against
+   * the inventory by name.</p>
    */
-  private List<Item> getInventoryItems(Player player) {
-    // TODO: needs Inventory.getItems() returning List<Item>
-    // Placeholder — will return empty until Vanessa adds getter
-    return new ArrayList<>();
+  private List<Item> getInventoryItems(Player player, GameWorld world) {
+    List<Item> result = new ArrayList<>();
+    Inventory bag = player.getInventory();
+    if (bag == null) {
+      return result;
+    }
+    for (Item item : world.getAllItems().values()) {
+      if (bag.getItem(item.getName()) != null) {
+        result.add(item);
+      }
+    }
+    return result;
   }
 }
