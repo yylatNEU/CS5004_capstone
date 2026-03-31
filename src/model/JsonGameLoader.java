@@ -63,7 +63,7 @@ public class JsonGameLoader {
                 getInt   (o, "value", 0),
                 getString(o, "when_used", "You use the item."),
                 getString(o, "description", "No description available."),
-                getString(o, "picture", "null")
+                getString(o, "picture", null)
         );
         world.addItem(item);
       } catch (Exception e) {
@@ -94,9 +94,9 @@ public class JsonGameLoader {
                 getString(o, "name", "Unknown Fixture"),
                 getInt   (o, "weight", 1000),
                 getString(o, "description", "No description available."),
-                getString(o, "picture", "null"),
-                getString(o, "puzzle", "null"),
-                getString(o, "status", "null")
+                getString(o, "puzzle", null),
+                getString(o, "states", null),
+                getString(o, "picture", null)
         );
         world.addFixture(fixture);
       } catch (Exception e) {
