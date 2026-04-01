@@ -52,7 +52,6 @@ public class GameController {
 		if (playerName.isEmpty()) {
 			playerName = "Player";
 		}
-		model.initialize();
 		model.setPlayerName(playerName);
 		
 		writeLine("");
