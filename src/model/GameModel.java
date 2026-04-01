@@ -4,26 +4,15 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * GameModel is the M in MVC.
- *
- * Responsibilities:
- *   - Maintain all game state (player, world, rooms, items, puzzles, monsters)
- *   - Enforce all game rules (movement, weight limit, puzzle solving, combat)
- *   - Return result strings to the Controller — never print anything directly
- *
- * Monster attack rule:
- *   A monster attacks ONLY when the player attempts to move (in any direction),
- *   whether the move succeeds or is blocked. This preserves strategic space —
- *   the player can examine, use items, and answer puzzles without taking damage.
- *
- * Scoring rule:
- *   Final score = sum of value from all solved puzzles
- *              + sum of value from all defeated monsters
- *              + sum of value from all items in inventory at game end
- *
- * What it does NOT do:
- *   - No reading from input (that is the Controller's job)
- *   - No printing to output (returns Strings only)
+ * Core game model (MVC - Model).
+ * <p>
+ * Handles:
+ *   - Game state (player, world, rooms, items, puzzles, monsters)
+ *   - Game logic (movement, combat, puzzles, inventory rules)
+ * <p>
+ * Notes:
+ *   - Monsters attack only when the player attempts to move
+ *   - Methods return messages; no direct printing
  */
 public class GameModel implements IGameModel {
 
@@ -60,14 +49,14 @@ public class GameModel implements IGameModel {
   // ── Movement ─────────────────────────────────────────────────────────────
 
   /**
-   * Attempts to move the player in the given direction.
-   *
-   * Movement rules:
-   *   exit == 0  → wall, cannot move
-   *   exit < 0   → blocked by puzzle or monster; monster attacks if present
-   *   exit > 0   → move succeeds; monster in NEW room attacks if active
-   *
-   * Monster attack is triggered on ANY move attempt (blocked or successful).
+   * Attempts to move the player in a direction.
+   * <p>
+   * Rules:
+   *   - 0  → wall (cannot move)
+   *   - <0 → blocked (puzzle/monster)
+   *   - >0 → move succeeds
+   * <p>
+   * A monster may attack on any move attempt.
    */
   @Override
   public String move(String direction) {
@@ -118,8 +107,8 @@ public class GameModel implements IGameModel {
   // ── Look ──────────────────────────────────────────────────────────────────
 
   /**
-   * Describes the current room.
-   * Does NOT trigger a monster attack — looking around is safe.
+   * Returns a description of the current room.
+   * Safe action — does not trigger attacks.
    */
   @Override
   public String look() {
@@ -128,6 +117,7 @@ public class GameModel implements IGameModel {
 
     sb.append("Health: ").append(player.getHealth())
             .append(" [").append(player.getHealthStatus()).append("]\n");
+    sb.append("Weight: ").append(player.getInventory().getCurrentWeight());
     sb.append(describeRoom(room));
 
     return sb.toString();
@@ -135,6 +125,9 @@ public class GameModel implements IGameModel {
 
   // ── Items ─────────────────────────────────────────────────────────────────
 
+  /**
+   * Picks up an item from the current room.
+   */
   @Override
   public String takeItem(String itemName) {
     Room room = currentRoom();
@@ -159,6 +152,9 @@ public class GameModel implements IGameModel {
     return "You pick up " + target.getName() + ".";
   }
 
+  /**
+   * Drops an item from inventory into the current room.
+   */
   @Override
   public String dropItem(String itemName) {
     Inventory inv = player.getInventory();
@@ -175,11 +171,10 @@ public class GameModel implements IGameModel {
 
   /**
    * Uses an item from inventory.
-   *
-   * If the current room has an active puzzle and this item is its solution,
-   * the puzzle is deactivated, the blocked exit is opened, and score is awarded.
-   * If the item matches the current monster's solution, the monster is defeated.
-   * The item's use() is always called (decrementing uses remaining).
+   * <p>
+   * - Solves puzzle if applicable
+   * - Defeats monster if it matches
+   * - Always consumes a use
    */
   @Override
   public String useItem(String itemName) {
@@ -218,6 +213,16 @@ public class GameModel implements IGameModel {
     return useResult;
   }
 
+  /**
+   * Examines an object by name.
+   * <p>
+   * Searches in:
+   *   - Inventory
+   *   - Current room items
+   *   - World fixtures
+   * <p>
+   * Returns its description if found.
+   */
   @Override
   public String examine(String name) {
     // Check inventory first
@@ -244,6 +249,9 @@ public class GameModel implements IGameModel {
     return "You don't see '" + name + "' here.";
   }
 
+  /**
+   * Returns a formatted list of items in the player's inventory.
+   */
   @Override
   public String getInventoryString() {
     return player.getInventory().listItems();
@@ -252,8 +260,8 @@ public class GameModel implements IGameModel {
   // ── Puzzle ────────────────────────────────────────────────────────────────
 
   /**
-   * Submits a text answer to the current room's active puzzle.
-   * Only works for puzzles whose solution is wrapped in single quotes.
+   * Submits a text answer to the current puzzle.
+   * Only valid for text-based puzzles.
    */
   @Override
   public String answerPuzzle(String answer) {
@@ -280,6 +288,9 @@ public class GameModel implements IGameModel {
 
   // ── Game state ────────────────────────────────────────────────────────────
 
+  /**
+   * Returns true if the player has no health remaining.
+   */
   @Override
   public boolean isGameOver() {
     return player.getHealth() <= 0;
@@ -287,7 +298,7 @@ public class GameModel implements IGameModel {
 
   /**
    * Builds the end-game summary with final score and rank.
-   *
+   * <p>
    * Rank thresholds:
    *   >= 500 → Gold Explorer
    *   >= 250 → Silver Adventurer
@@ -310,6 +321,9 @@ public class GameModel implements IGameModel {
 
   // ── Save / Restore ────────────────────────────────────────────────────────
 
+  /**
+   * Saves the current game state.
+   */
   @Override
   public String save() {
     try {
@@ -320,6 +334,9 @@ public class GameModel implements IGameModel {
     }
   }
 
+  /**
+   * Restores a previously saved game state.
+   */
   @Override
   public String restore() {
     try {
@@ -399,9 +416,7 @@ public class GameModel implements IGameModel {
   }
 
   /**
-   * Opens all exits in a room that are currently blocked (negative values)
-   * by flipping them to their positive equivalent.
-   * Called after a puzzle is solved or a monster is defeated.
+   * Unlocks exits after puzzle solved or monster defeated.
    */
   private void openBlockedExits(Room room) {
     for (Direction dir : Direction.values()) {
