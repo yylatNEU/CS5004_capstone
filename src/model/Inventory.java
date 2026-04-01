@@ -82,12 +82,14 @@ public class Inventory {
           .append(it.getName())
           .append(" (weight: ")
           .append(it.getWeight())
+          .append(", uses: ")
+          .append(it.getUsesRemaining())
           .append(")\n");
     }
 
     result.append(String.format(
-        "Total weight: %.1f / %.1f",
-        totalWeight, MAX_CAPACITY));
+        "Total weight: %d / %d",
+        (int) totalWeight, (int) MAX_CAPACITY));
 
     return result.toString();
   }

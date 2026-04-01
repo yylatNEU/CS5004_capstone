@@ -117,7 +117,7 @@ public class GameModel implements IGameModel {
 
     sb.append("Health: ").append(player.getHealth())
             .append(" [").append(player.getHealthStatus()).append("]\n");
-    sb.append("Weight: ").append(player.getInventory().getCurrentWeight());
+    sb.append("Weight: ").append((int) player.getInventory().getCurrentWeight()).append("\n");
     sb.append(describeRoom(room));
 
     return sb.toString();
@@ -189,6 +189,12 @@ public class GameModel implements IGameModel {
     }
 
     String useResult = item.use();
+    if (!item.isUsable()) {
+      inv.removeItem(itemName);
+      useResult += "\n" + item.getName() + " is broken and dropped from inventory.";
+    } else {
+      useResult += " (" + item.getUsesRemaining() + " uses remaining)";
+    }
     Room room = currentRoom();
 
     // Check puzzle solution
@@ -381,7 +387,10 @@ public class GameModel implements IGameModel {
       sb.append("Items here: ");
       for (int i = 0; i < items.size(); i++) {
         if (i > 0) sb.append(", ");
-        sb.append(items.get(i).getName().toUpperCase());
+        sb.append(items.get(i).getName().toUpperCase())
+            .append(" (weight: ")
+            .append(items.get(i).getWeight())
+            .append(")");
       }
       sb.append("\n");
     }
