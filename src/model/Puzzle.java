@@ -80,7 +80,7 @@ public class Puzzle {
 
     public boolean solve(String input) {
         if (solution.startsWith("'")) {
-            return input.equals(getCleanSolution());
+            return input.equalsIgnoreCase(getCleanSolution());
         } 
         else {
             return input.equals(solution);

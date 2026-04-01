@@ -104,4 +104,8 @@ public class Room {
 		}
 		this.fixture.add(fixture);
 	}
+	
+	public Monster getMonster() {
+		return this.monster;
+	}
 }
