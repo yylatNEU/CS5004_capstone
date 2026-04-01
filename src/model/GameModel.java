@@ -391,9 +391,9 @@ public class GameModel implements IGameModel {
    * Applies monster attack damage to the player and returns the attack message.
    */
   private String monsterAttack(Monster monster) {
-    player.takeDamage(monster.getDamage());
+    player.takeDamage(Math.abs(monster.getDamage()));
     return monster.getName().toUpperCase() + " attacks! " + monster.getAttack()
-            + "\nYou take " + monster.getDamage() + " damage!"
+            + "\nYou take " + Math.abs(monster.getDamage()) + " damage!"
             + "\nHealth: " + player.getHealth()
             + " [" + player.getHealthStatus() + "]";
   }
