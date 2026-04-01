@@ -15,6 +15,8 @@ public class GameController {
 	private final Readable source;
 	private final Appendable output;
 	
+	private boolean hasWon = false;
+	
 	/**
 	 * Constructs a controller.
 	 *
@@ -50,14 +52,14 @@ public class GameController {
 		if (playerName.isEmpty()) {
 			playerName = "Player";
 		}
-		
-		model.startGame(playerName);
+		model.initialize();
+		model.setPlayerName(playerName);
 		
 		writeLine("");
 		writeLine("Game started.");
-		renderState();
+		model.look();
 		
-		while (!model.isGameOver()) {
+		while (!model.isGameOver() && !hasWon) {
 			writeLine("");
 			writeLine("Commands: N S E W | L(look) | I(inventory) | T(take) | D(drop) | "
 					+ "X(examine) | U(use) | A(answer) | Save | Restore | Q(quit)");
@@ -79,14 +81,14 @@ public class GameController {
 			} catch (IllegalArgumentException | IllegalStateException e) {
 				writeLine("Error: " + e.getMessage());
 			}
-			
-			if (!model.isGameOver()) {
-				renderState();
-			}
 		}
 		
 		writeLine("");
-		writeLine("Congratulations! You won!");
+		if (hasWon) {
+			writeLine("Congratulations! You won!");
+		} else if (model.isGameOver()) {
+			writeLine("Game over. You fell asleep.");
+		}
 	}
 	
 	/**
@@ -156,7 +158,10 @@ public class GameController {
 			case "restore":
 				handleRestore(scan);
 				break;
-			
+			case "q":
+			case "quit":
+				// Handled in play() loop
+				this.hasWon = true; // Force exit
 			default:
 				writeLine("Unknown command.");
 		}
@@ -237,7 +242,7 @@ public class GameController {
 			writeLine("Usage: save <file name>");
 			return;
 		}
-		model.saveGame(fileName);
+		model.save();
 		writeLine("Game saved to " + fileName);
 	}
 	
@@ -251,20 +256,14 @@ public class GameController {
 			writeLine("Usage: restore <file name>");
 			return;
 		}
-		model.restoreGame(fileName);
+		model.restore();
 		writeLine("Game restored from " + fileName);
 	}
 	
 	/**
 	 * Renders the current visible game state.
 	 */
-	private void renderState() throws IOException {
-		writeLine("--------------------------------------------------");
-		writeLine(model.describeRoom());
-		writeLine("Health: " + model.getHealth() + " (" + model.getHealthStatus() + ")");
-		writeLine("Carry Weight: " + model.getCurrentCarryWeight() + "/" + model.getMaxCarryWeight());
-		writeLine("--------------------------------------------------");
-	}
+
 	
 	private void write(String s) throws IOException {
 		output.append(s);

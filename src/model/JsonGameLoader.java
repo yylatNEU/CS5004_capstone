@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Reads a JSON game file and constructs/saves data in GameWorld.
@@ -208,9 +210,13 @@ public class JsonGameLoader {
         int    east       = getInt   (o, "E", 0);
         int    west       = getInt   (o, "W", 0);
         String picture    = getString(o, "picture", null);
-
+        Map<Direction, Integer> exits = new HashMap<>();
+        exits.put(Direction.NORTH, north);
+        exits.put(Direction.SOUTH, south);
+        exits.put(Direction.EAST,  east);
+        exits.put(Direction.WEST,  west);
         Room room = new Room(roomNumber, roomName, description,
-                north, south, east, west, picture);
+                exits, picture);
 
         String itemNames = getString(o, "items", null);
         if (itemNames != null) {
