@@ -232,31 +232,13 @@ public class GameController {
 	}
 	
 	private void handleSave(Scanner scan) throws IOException {
-		if (!scan.hasNextLine()) {
-			writeLine("Missing save file name.");
-			return;
-		}
-		String fileName = scan.nextLine().trim();
-		if (fileName.isEmpty()) {
-			writeLine("Usage: save <file name>");
-			return;
-		}
 		model.save();
-		writeLine("Game saved to " + fileName);
+		writeLine("Game saved.");
 	}
 	
 	private void handleRestore(Scanner scan) throws IOException {
-		if (!scan.hasNextLine()) {
-			writeLine("Missing restore file name.");
-			return;
-		}
-		String fileName = scan.nextLine().trim();
-		if (fileName.isEmpty()) {
-			writeLine("Usage: restore <file name>");
-			return;
-		}
 		model.restore();
-		writeLine("Game restored from " + fileName);
+		writeLine("Game restored.");
 	}
 	
 	/**
