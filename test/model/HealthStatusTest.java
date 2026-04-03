@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for HealthStatus.
- *
+ * <p>
  * Verifies:
  *   - Correct mapping from health values
  *   - Boundary conditions
