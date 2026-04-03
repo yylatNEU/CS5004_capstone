@@ -3,9 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a player's inventory with a weight constraint.
- */
+/** Represents a player's inventory with a fixed carry capacity. */
 public class Inventory {
 
   private static final double MAX_CAPACITY = 13.0;
@@ -13,16 +11,17 @@ public class Inventory {
   private final List<Item> storage;
   private double totalWeight;
 
-  /**
-   * Initializes an empty inventory.
-   */
+  /** Creates an empty inventory. */
   public Inventory() {
     this.storage = new ArrayList<>();
     this.totalWeight = 0.0;
   }
 
   /**
-   * Determines if an item can be stored without exceeding capacity.
+   * Returns whether an item can be added without exceeding capacity.
+   *
+   * @param item the item to check
+   * @return {@code true} if the item fits
    */
   public boolean canAdd(Item item) {
     if (item == null) {
@@ -32,7 +31,10 @@ public class Inventory {
   }
 
   /**
-   * Attempts to store an item.
+   * Adds an item if capacity allows.
+   *
+   * @param item the item to add
+   * @return {@code true} if the item was added
    */
   public boolean addItem(Item item) {
     if (!canAdd(item)) {
@@ -44,7 +46,24 @@ public class Inventory {
   }
 
   /**
-   * Removes the first matching item by name (case-insensitive).
+   * Returns the remaining uses for a named item.
+   *
+   * @param name the item name
+   * @return the remaining uses, or {@code -1} if not present
+   */
+  public int getItemUses(String name) {
+    int index = findItemIndex(name);
+    if (index < 0) {
+      return -1;
+    }
+    return storage.get(index).getUsesRemaining();
+  }
+
+  /**
+   * Removes the first matching item by name.
+   *
+   * @param name the item name
+   * @return {@code true} if an item was removed
    */
   public boolean removeItem(String name) {
     int index = findItemIndex(name);
@@ -58,15 +77,20 @@ public class Inventory {
   }
 
   /**
-   * Finds an item by name without removing it.
+   * Returns the first matching item by name.
+   *
+   * @param name the item name
+   * @return the matching item, or {@code null}
    */
   public Item getItem(String name) {
     int index = findItemIndex(name);
-    return (index >= 0) ? storage.get(index) : null;
+    return index >= 0 ? storage.get(index) : null;
   }
 
   /**
    * Returns a formatted inventory summary.
+   *
+   * @return the inventory text
    */
   public String listItems() {
     if (storage.isEmpty()) {
@@ -75,35 +99,29 @@ public class Inventory {
 
     StringBuilder result = new StringBuilder();
     result.append("Inventory:\n");
-
-    for (int i = 0; i < storage.size(); i++) {
-      Item it = storage.get(i);
-      result.append("  - ")
-          .append(it.getName())
+    for (Item item : storage) {
+      result
+          .append("  - ")
+          .append(item.getName())
           .append(" (weight: ")
-          .append(it.getWeight())
+          .append(item.getWeight())
           .append(", uses: ")
-          .append(it.getUsesRemaining())
+          .append(item.getUsesRemaining())
           .append(")\n");
     }
-
-    result.append(String.format(
-        "Total weight: %d / %d",
-        (int) totalWeight, (int) MAX_CAPACITY));
-
+    result.append(String.format("Total weight: %d / %d", (int) totalWeight, (int) MAX_CAPACITY));
     return result.toString();
   }
 
   /**
-   * Returns current total weight.
+   * Returns the current total carried weight.
+   *
+   * @return the weight value
    */
   public double getCurrentWeight() {
     return totalWeight;
   }
 
-  /**
-   * Helper: finds index of item by name.
-   */
   private int findItemIndex(String name) {
     if (name == null) {
       return -1;

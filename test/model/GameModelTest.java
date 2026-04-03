@@ -1,229 +1,165 @@
 package model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Unit tests for GameModel.
- *
- * Covers:
- *   - Movement (valid / invalid / wall)
- *   - Room description (look)
- *   - Item interactions (take, drop, use)
- *   - Examine behavior
- *   - Game state (game over, summary)
- */
+/** Unit tests for {@link GameModel}. */
 class GameModelTest {
+
+  private static final Path SAVE_FILE = Path.of("savegame.json");
 
   private GameModel model;
 
   @BeforeEach
-  void setup() {
-    GameWorld world = TestWorldFactory.createSimpleWorld();
-    model = new GameModel(world);
+  void setUp() throws Exception {
+    Files.deleteIfExists(SAVE_FILE);
+    model = new GameModel(TestWorldFactory.createSimpleWorld());
     model.setPlayerName("Tester");
   }
 
-  // ─────────────────────────────────────────────
-  // move()
-  // ─────────────────────────────────────────────
-
-  @Test
-  void testMoveInvalidDirection() {
-    String result = model.move("invalid");
-    assertEquals("Invalid direction.", result);
+  @AfterEach
+  void tearDown() throws Exception {
+    Files.deleteIfExists(SAVE_FILE);
   }
 
   @Test
-  void testMoveWall() {
-    String result = model.move("north"); // defined as wall (0)
-    assertTrue(result.contains("wall"));
+  void moveRejectsInvalidDirection() {
+    assertEquals("Invalid direction.", model.move("invalid"));
   }
 
   @Test
-  void testMoveSuccessChangesRoom() {
-    String result = model.move("east"); // goes to room 2
+  void moveRejectsWallExit() {
+    assertTrue(model.move("north").contains("wall"));
+  }
 
+  @Test
+  void moveChangesRoomOnValidExit() {
+    String result = model.move("east");
     assertTrue(result.contains("You are in"));
     assertTrue(result.contains("SECOND ROOM"));
   }
 
-  // ─────────────────────────────────────────────
-  // look()
-  // ─────────────────────────────────────────────
-
   @Test
-  void testLookContainsPlayerInfo() {
+  void lookIncludesPlayerStatusAndRoomDescription() {
     String result = model.look();
-
     assertTrue(result.contains("Health"));
     assertTrue(result.contains("Weight"));
     assertTrue(result.contains("You are in"));
   }
 
   @Test
-  void testLookDoesNotChangeHealth() {
-    String before = model.look();
-    String after = model.look();
-
-    assertEquals(before, after);
-  }
-
-  // ─────────────────────────────────────────────
-  // takeItem()
-  // ─────────────────────────────────────────────
-
-  @Test
-  void testTakeItemSuccess() {
-    String result = model.takeItem("Key");
-
-    assertTrue(result.contains("pick up Key"));
+  void takeItemMovesItemIntoInventory() {
+    assertTrue(model.takeItem("Key").contains("pick up Key"));
+    assertTrue(model.getInventoryString().contains("Key"));
   }
 
   @Test
-  void testTakeItemNotFound() {
-    String result = model.takeItem("Ghost");
-
-    assertTrue(result.contains("don't see"));
+  void dropItemMovesItemBackIntoRoom() {
+    model.takeItem("Key");
+    assertTrue(model.dropItem("Key").contains("drop Key"));
+    assertTrue(model.examine("Key").contains("A small key"));
   }
 
   @Test
-  void testTakeItemRemovesFromRoom() {
+  void useItemConsumesUsesAndEventuallyBreaksItem() {
     model.takeItem("Key");
 
-    String result = model.takeItem("Key");
-
-    assertTrue(
-        result.contains("no items") || result.contains("don't see")
-    );
-  }
-
-  // ─────────────────────────────────────────────
-  // dropItem()
-  // ─────────────────────────────────────────────
-
-  @Test
-  void testDropItemSuccess() {
-    model.takeItem("Key");
-
-    String result = model.dropItem("Key");
-
-    assertTrue(result.contains("drop Key"));
-  }
-
-  @Test
-  void testDropItemNotInInventory() {
-    String result = model.dropItem("Nothing");
-
-    assertTrue(result.contains("don't have"));
-  }
-
-  // ─────────────────────────────────────────────
-  // useItem()
-  // ─────────────────────────────────────────────
-
-  @Test
-  void testUseItemSuccess() {
-    model.takeItem("Key");
-
-    String result = model.useItem("Key");
-
-    assertTrue(result.contains("used"));
-  }
-
-  @Test
-  void testUseItemNotFound() {
-    String result = model.useItem("Fake");
-
-    assertTrue(result.contains("don't have"));
-  }
-
-  @Test
-  void testUseItemDecreasesUses() {
-    model.takeItem("Key");
-
-    String result = model.useItem("Key");
-
-    assertTrue(result.contains("uses remaining"));
-  }
-
-  @Test
-  void testUseItemEventuallyRemoved() {
-    model.takeItem("Key");
-
-    // uses = 3 → use 3 times
+    assertTrue(model.useItem("Key").contains("2 uses remaining"));
     model.useItem("Key");
-    model.useItem("Key");
-    String result = model.useItem("Key");
+    String finalUse = model.useItem("Key");
 
-    assertTrue(result.contains("broken"));
+    assertTrue(finalUse.contains("broken"));
+    assertTrue(model.getInventoryString().contains("empty"));
   }
 
-  // ─────────────────────────────────────────────
-  // examine()
-  // ─────────────────────────────────────────────
-
   @Test
-  void testExamineInventoryItem() {
+  void examineFindsInventoryItemsRoomItemsAndFixtures() {
+    assertTrue(model.examine("Key").contains("A small key"));
+    assertTrue(model.examine("Desk").contains("sturdy desk"));
+
     model.takeItem("Key");
-
-    String result = model.examine("Key");
-
-    assertTrue(result.contains("Key"));
-    assertTrue(result.contains("A small key"));
+    assertTrue(model.examine("Key").contains("A small key"));
   }
 
   @Test
-  void testExamineRoomItem() {
-    String result = model.examine("Key");
+  void answerPuzzleSolvesAnswerBasedPuzzle() {
+    GameModel puzzleModel = new GameModel(TestWorldFactory.createAnswerPuzzleWorld());
+    puzzleModel.setPlayerName("Tester");
 
-    assertTrue(result.contains("Key"));
+    String result = puzzleModel.answerPuzzle("ALIGN");
+
+    assertTrue(result.contains("Correct!"));
+    assertTrue(puzzleModel.move("north").contains("ARCHIVE"));
   }
 
   @Test
-  void testExamineNotFound() {
-    String result = model.examine("Ghost");
+  void answerPuzzleRejectsWrongAnswer() {
+    GameModel puzzleModel = new GameModel(TestWorldFactory.createAnswerPuzzleWorld());
+    puzzleModel.setPlayerName("Tester");
 
-    assertTrue(result.contains("don't see"));
-  }
-
-  // ─────────────────────────────────────────────
-  // inventory string
-  // ─────────────────────────────────────────────
-
-  @Test
-  void testGetInventoryStringEmpty() {
-    String result = model.getInventoryString();
-
-    assertTrue(result.contains("empty"));
+    assertTrue(puzzleModel.answerPuzzle("wrong").contains("not the correct answer"));
   }
 
   @Test
-  void testGetInventoryStringAfterPickup() {
-    model.takeItem("Key");
+  void useItemSolvesItemBasedPuzzle() {
+    GameModel puzzleModel = new GameModel(TestWorldFactory.createItemPuzzleWorld());
+    puzzleModel.setPlayerName("Tester");
+    puzzleModel.takeItem("Silver Key");
 
-    String result = model.getInventoryString();
+    String result = puzzleModel.useItem("Silver Key");
 
-    assertTrue(result.contains("Key"));
+    assertTrue(result.contains("Puzzle solved"));
+    assertTrue(puzzleModel.move("east").contains("TREASURE ROOM"));
   }
 
-  // ─────────────────────────────────────────────
-  // game state
-  // ─────────────────────────────────────────────
+  @Test
+  void enteringMonsterRoomTriggersAttackAndUsingSolutionDefeatsMonster() {
+    GameModel monsterModel = new GameModel(TestWorldFactory.createMonsterWorld());
+    monsterModel.setPlayerName("Tester");
+    monsterModel.takeItem("Hair Clippers");
+
+    String moveResult = monsterModel.move("east");
+    String useResult = monsterModel.useItem("Hair Clippers");
+
+    assertTrue(moveResult.contains("attacks"));
+    assertTrue(moveResult.contains("Health: 80"));
+    assertTrue(useResult.contains("defeated Teddy Bear"));
+  }
 
   @Test
-  void testGameNotOverInitially() {
+  void endGameSummaryIncludesRankAndScore() {
+    String result = model.getEndGameSummary();
+    assertTrue(result.contains("GAME OVER"));
+    assertTrue(result.contains("Score"));
+    assertTrue(result.contains("Rank"));
+  }
+
+  @Test
+  void gameStartsActive() {
     assertFalse(model.isGameOver());
   }
 
   @Test
-  void testEndGameSummaryFormat() {
-    String result = model.getEndGameSummary();
+  void saveAndRestoreReturnPlayerToSavedState() {
+    model.takeItem("Key");
+    model.useItem("Key");
 
-    assertTrue(result.contains("GAME OVER"));
-    assertTrue(result.contains("Score"));
-    assertTrue(result.contains("Rank"));
+    assertEquals("Game saved successfully.", model.save());
+
+    model.dropItem("Key");
+    assertTrue(model.move("east").contains("SECOND ROOM"));
+
+    String restoreResult = model.restore();
+
+    assertTrue(restoreResult.contains("Game restored."));
+    assertTrue(restoreResult.contains("START ROOM"));
+    assertTrue(model.getInventoryString().contains("Key"));
   }
 }

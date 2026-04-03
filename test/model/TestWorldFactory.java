@@ -1,101 +1,202 @@
 package model;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * Builds a minimal GameWorld for unit testing.
- * <p>
- * World layout:
- * <p>
- *   Room 1 (start)
- *     - EAST → Room 2
- *     - NORTH → wall (0)
- *     - contains: Key
- * <p>
- *   Room 2
- *     - WEST → Room 1
- */
-public class TestWorldFactory {
+/** Factory helpers for model tests. */
+public final class TestWorldFactory {
 
+  private TestWorldFactory() {
+    // Utility class.
+  }
+
+  /**
+   * Creates a minimal world with two rooms and one item in the starting room.
+   *
+   * @return the test world
+   */
   public static GameWorld createSimpleWorld() {
-    resetRooms(); // very important (static map)
-
     GameWorld world = new GameWorld("Test Game", "1.0");
 
-    // ─────────────────────────────────────────
-    // Create exits map
-    // ─────────────────────────────────────────
-    Map<Direction, Integer> exits1 = new HashMap<>();
-    Map<Direction, Integer> exits2 = new HashMap<>();
+    Item key = new Item("Key", 2, 3, 3, 0, "You used the key", "A small key", null);
+    Fixture desk = new Fixture("Desk", 400, "A sturdy desk.", null, null, null);
+    world.addItem(key);
+    world.addFixture(desk);
 
-    // ─────────────────────────────────────────
-    // Create rooms
-    // ─────────────────────────────────────────
-    Room room1 = new Room(
-        1,
-        "Start Room",
-        "This is the starting room.",
-        exits1,
-        null
-    );
-
-    Room room2 = new Room(
-        2,
-        "Second Room",
-        "This is another room.",
-        exits2,
-        null
-    );
-
-    // ─────────────────────────────────────────
-    // Setup exits
-    // ─────────────────────────────────────────
-    room1.setExit(Direction.EAST, 2);
-    room1.setExit(Direction.NORTH, 0); // wall
-
-    room2.setExit(Direction.WEST, 1);
-
-    // ─────────────────────────────────────────
-    // Add item to room1
-    // ─────────────────────────────────────────
-    Item key = new Item(
-        "Key",
-        2,      // weight
-        3,      // maxUses
-        3,      // usesRemaining
-        0,      // value
-        "You used the key",
-        "A small key",
-        null
-    );
-
+    Room room1 = new Room(1, "Start Room", "This is the starting room.", exits(0, 0, 2, 0), null);
     room1.addItem(key);
 
-    // ─────────────────────────────────────────
-    // Register rooms into world (IMPORTANT)
-    // ─────────────────────────────────────────
+    Room room2 = new Room(2, "Second Room", "This is another room.", exits(0, 0, 0, 1), null);
+
     world.addRoom(room1);
     world.addRoom(room2);
-
     return world;
   }
 
   /**
-   * Clears static GameWorld.rooms map using reflection.
-   * Required to avoid cross-test contamination.
+   * Creates a world with an answer-based puzzle in the starting room.
+   *
+   * @return the test world
    */
-  private static void resetRooms() {
-    try {
-      Field roomsField = GameWorld.class.getDeclaredField("rooms");
-      roomsField.setAccessible(true);
+  public static GameWorld createAnswerPuzzleWorld() {
+    GameWorld world = new GameWorld("Puzzle Game", "1.0");
+    Puzzle puzzle =
+        new Puzzle(
+            "Riddle Door",
+            true,
+            true,
+            false,
+            "'align'",
+            120,
+            "A sealed door with a riddle.",
+            "Symbols glow across the locked door.",
+            "1:Start Room");
+    world.addPuzzle(puzzle);
 
-      Map<?, ?> rooms = (Map<?, ?>) roomsField.get(null);
-      rooms.clear();
+    Room room1 =
+        new Room(1, "Start Room", "A room with a sealed northern door.", exits(-2, 0, 0, 0), null);
+    room1.setPuzzle(puzzle);
 
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to reset GameWorld rooms", e);
-    }
+    Room room2 = new Room(2, "Archive", "Rows of books line the walls.", exits(0, 1, 0, 0), null);
+
+    world.addRoom(room1);
+    world.addRoom(room2);
+    return world;
+  }
+
+  /**
+   * Creates a world with an item-based puzzle in the starting room.
+   *
+   * @return the test world
+   */
+  public static GameWorld createItemPuzzleWorld() {
+    GameWorld world = new GameWorld("Item Puzzle Game", "1.0");
+    Item key =
+        new Item("Silver Key", 1, 2, 2, 0, "You turn the silver key", "A polished key.", null);
+    Puzzle puzzle =
+        new Puzzle(
+            "Lock",
+            true,
+            true,
+            false,
+            "Silver Key",
+            150,
+            "A lock bars the way.",
+            "A heavy lock blocks the exit.",
+            "1:Start Room");
+
+    world.addItem(key);
+    world.addPuzzle(puzzle);
+
+    Room room1 =
+        new Room(1, "Start Room", "A room with a locked eastern gate.", exits(0, 0, -2, 0), null);
+    room1.setPuzzle(puzzle);
+    room1.addItem(key);
+
+    Room room2 = new Room(2, "Treasure Room", "A room beyond the gate.", exits(0, 0, 0, 1), null);
+
+    world.addRoom(room1);
+    world.addRoom(room2);
+    return world;
+  }
+
+  /**
+   * Creates a world with a monster in the second room.
+   *
+   * @return the test world
+   */
+  public static GameWorld createMonsterWorld() {
+    GameWorld world = new GameWorld("Monster Game", "1.0");
+    Item clippers =
+        new Item("Hair Clippers", 2, 2, 2, 0, "The clippers buzz loudly", "Sharp clippers.", null);
+    Monster monster =
+        new Monster(
+            "Teddy Bear",
+            true,
+            true,
+            true,
+            "Hair Clippers",
+            200,
+            "A harmless teddy bear lies on the floor.",
+            "A furious teddy bear blocks the room.",
+            -20,
+            "2:Den",
+            true,
+            "It swipes at you.");
+
+    world.addItem(clippers);
+    world.addMonster(monster);
+
+    Room room1 = new Room(1, "Start Room", "A quiet starting room.", exits(0, 0, 2, 0), null);
+    room1.addItem(clippers);
+
+    Room room2 = new Room(2, "Den", "A cramped den.", exits(0, 0, 0, 1), null);
+    room2.setMonster(monster);
+
+    world.addRoom(room1);
+    world.addRoom(room2);
+    return world;
+  }
+
+  /**
+   * Creates a world suitable for save/restore tests.
+   *
+   * @return the test world
+   */
+  public static GameWorld createPersistenceWorld() {
+    GameWorld world = new GameWorld("Persistence Game", "1.0");
+    Item key = new Item("Key", 1, 3, 1, 5, "You turn the key", "A brass key.", null);
+    Item note = new Item("Note", 1, 1, 1, 2, "You read the note", "A handwritten note.", null);
+    Puzzle puzzle =
+        new Puzzle(
+            "Lock",
+            true,
+            true,
+            false,
+            "Key",
+            50,
+            "A locked mechanism.",
+            "A lock seals the passage.",
+            "1:Entry");
+    Monster monster =
+        new Monster(
+            "Robot",
+            true,
+            true,
+            true,
+            "Key",
+            75,
+            "A disabled robot slumps in the corner.",
+            "A robot patrols the chamber.",
+            -10,
+            "2:Lab",
+            true,
+            "It shocks you.");
+
+    world.addItem(key);
+    world.addItem(note);
+    world.addPuzzle(puzzle);
+    world.addMonster(monster);
+
+    Room room1 = new Room(1, "Entry", "The first room.", exits(0, 0, 2, 0), null);
+    room1.addItem(key);
+    room1.addItem(note);
+    room1.setPuzzle(puzzle);
+
+    Room room2 = new Room(2, "Lab", "A humming laboratory.", exits(0, 0, 0, 1), null);
+    room2.setMonster(monster);
+
+    world.addRoom(room1);
+    world.addRoom(room2);
+    return world;
+  }
+
+  private static Map<Direction, Integer> exits(int north, int south, int east, int west) {
+    Map<Direction, Integer> exits = new EnumMap<>(Direction.class);
+    exits.put(Direction.NORTH, north);
+    exits.put(Direction.SOUTH, south);
+    exits.put(Direction.EAST, east);
+    exits.put(Direction.WEST, west);
+    return exits;
   }
 }

@@ -1,10 +1,9 @@
 package model;
 
 /**
- * Represents an item in the adventure game world.
- * Items can be picked up, dropped, examined, and used by the player.
- * Each item has a limited number of uses and a weight that counts
- * toward the player's carry limit.
+ * Represents an item in the adventure game world. Items can be picked up, dropped, examined, and
+ * used by the player. Each item has a limited number of uses and a weight that counts toward the
+ * player's carry limit.
  */
 public class Item {
 
@@ -20,19 +19,26 @@ public class Item {
   /**
    * Constructs an Item with the given attributes.
    *
-   * @param name          the name of this item
-   * @param weight        how much this item weighs (must be non-negative)
-   * @param maxUses       the maximum number of times this item can be used
+   * @param name the name of this item
+   * @param weight how much this item weighs (must be non-negative)
+   * @param maxUses the maximum number of times this item can be used
    * @param usesRemaining the current remaining uses (0 to maxUses)
-   * @param value         the point value of this item for scoring
-   * @param whenUsed      the text displayed when the item is successfully used
-   * @param description   the text displayed when the item is examined
-   * @param picture       the filename of an associated image, or null
-   * @throws IllegalArgumentException if name is null or blank, weight is negative,
-   *     maxUses is negative, or usesRemaining is out of range
+   * @param value the point value of this item for scoring
+   * @param whenUsed the text displayed when the item is successfully used
+   * @param description the text displayed when the item is examined
+   * @param picture the filename of an associated image, or null
+   * @throws IllegalArgumentException if name is null or blank, weight is negative, maxUses is
+   *     negative, or usesRemaining is out of range
    */
-  public Item(String name, int weight, int maxUses, int usesRemaining,
-      int value, String whenUsed, String description, String picture) {
+  public Item(
+      String name,
+      int weight,
+      int maxUses,
+      int usesRemaining,
+      int value,
+      String whenUsed,
+      String description,
+      String picture) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException("Item name cannot be null or blank.");
     }
@@ -43,8 +49,7 @@ public class Item {
       throw new IllegalArgumentException("Max uses cannot be negative.");
     }
     if (usesRemaining < 0 || usesRemaining > maxUses) {
-      throw new IllegalArgumentException(
-          "Uses remaining must be between 0 and maxUses.");
+      throw new IllegalArgumentException("Uses remaining must be between 0 and maxUses.");
     }
     this.name = name;
     this.weight = weight;
@@ -129,16 +134,15 @@ public class Item {
   }
 
   /**
-   * Sets the remaining uses for this item.
-   * Used when restoring a saved game to recover previous state.
+   * Sets the remaining uses for this item. Used when restoring a saved game to recover previous
+   * state.
    *
    * @param uses the number of uses to set (0 to maxUses)
    * @throws IllegalArgumentException if uses is out of range
    */
   public void setUsesRemaining(int uses) {
     if (uses < 0 || uses > maxUses) {
-      throw new IllegalArgumentException(
-          "Uses remaining must be between 0 and maxUses.");
+      throw new IllegalArgumentException("Uses remaining must be between 0 and maxUses.");
     }
     this.usesRemaining = uses;
   }
@@ -153,9 +157,8 @@ public class Item {
   }
 
   /**
-   * Uses this item once, decrementing the remaining uses.
-   * If the item still has uses, returns the when-used text.
-   * If the item is exhausted, returns a message indicating it cannot be used.
+   * Uses this item once, decrementing the remaining uses. If the item still has uses, returns the
+   * when-used text. If the item is exhausted, returns a message indicating it cannot be used.
    *
    * @return the result text of attempting to use this item
    */

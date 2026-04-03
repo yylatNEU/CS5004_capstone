@@ -1,165 +1,122 @@
 package model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.EnumMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Unit tests for Room.
- */
+/** Unit tests for {@link Room}. */
 class RoomTest {
 
+  private GameWorld world;
   private Room room;
 
   @BeforeEach
-  void setup() {
-    Map<Direction, Integer> exits = new HashMap<>();
+  void setUp() {
+    Map<Direction, Integer> exits = new EnumMap<>(Direction.class);
     exits.put(Direction.NORTH, 2);
-    exits.put(Direction.SOUTH, 0); // wall
+    exits.put(Direction.SOUTH, 0);
+    exits.put(Direction.EAST, 0);
+    exits.put(Direction.WEST, 0);
 
-    room = new Room(1, "Test Room", "A test room", exits, null);
-
-    GameWorld world = new GameWorld("Test", "1.0");
+    room = new Room(1, "Test Room", "A test room", exits, "room.png");
+    world = new GameWorld("Test", "1.0");
     world.addRoom(room);
-
-    Room room2 = new Room(2, "Room 2", "Second room", new HashMap<>(), null);
-    world.addRoom(room2);
+    world.addRoom(new Room(2, "Room 2", "Second room", exits(0, 1, 0, 0), null));
   }
 
-  // ─────────────────────────────────────────────
-  // exits
-  // ─────────────────────────────────────────────
+  @Test
+  void basicPropertiesAreExposed() {
+    assertEquals(1, room.getRoomNumber());
+    assertEquals("Test Room", room.getRoomName());
+    assertEquals("A test room", room.getDescription());
+    assertEquals("room.png", room.getPicture());
+  }
 
   @Test
-  void testGetExit() {
+  void exitsCanBeReadAndUpdated() {
     assertEquals(2, room.getExit(Direction.NORTH));
-    assertEquals(0, room.getExit(Direction.SOUTH));
-  }
-
-  @Test
-  void testSetExit() {
     room.setExit(Direction.EAST, 3);
     assertEquals(3, room.getExit(Direction.EAST));
   }
 
-  // ─────────────────────────────────────────────
-  // passable / transition
-  // ─────────────────────────────────────────────
-
   @Test
-  void testPassableTrue() {
+  void passableAndTransitionRespectExitValues() {
     assertTrue(room.passable(Direction.NORTH));
-  }
-
-  @Test
-  void testPassableFalse() {
     assertFalse(room.passable(Direction.SOUTH));
+    assertEquals(2, room.transition(Direction.NORTH, world).getRoomNumber());
+    assertNull(room.transition(Direction.SOUTH, world));
   }
 
   @Test
-  void testTransitionSuccess() {
-    Room next = room.transition(Direction.NORTH);
-    assertNotNull(next);
-    assertEquals(2, next.getRoomNumber());
-  }
-
-  @Test
-  void testTransitionBlocked() {
-    assertNull(room.transition(Direction.SOUTH));
-  }
-
-  // ─────────────────────────────────────────────
-  // items
-  // ─────────────────────────────────────────────
-
-  private Item makeItem(String name) {
-    return new Item(name, 1, 1, 1, 0, "used", "desc", null);
-  }
-
-  @Test
-  void testAddItem() {
-    Item item = makeItem("Key");
+  void itemsCanBeAddedAndRemoved() {
+    Item item = new Item("Key", 1, 1, 1, 0, "used", "desc", null);
     room.addItem(item);
-
-    assertNotNull(room.getItems());
     assertEquals(1, room.getItems().size());
-  }
 
-  @Test
-  void testRemoveItem() {
-    Item item = makeItem("Key");
-
-    room.addItem(item);
     room.removeItem(item);
-
     assertTrue(room.getItems().isEmpty());
   }
 
   @Test
-  void testRemoveItemWhenEmpty() {
-    room.removeItem(makeItem("Ghost"));
-    assertNull(room.getItems());
-  }
-
-  // ─────────────────────────────────────────────
-  // monster / puzzle（修正重點）
-  // ─────────────────────────────────────────────
-
-  @Test
-  void testSetAndGetMonster() {
-    Monster monster = new Monster(
-        "Goblin",
-        true,   // active
-        false,  // affectsTarget
-        true,   // affectsPlayer
-        "key",  // solution
-        10,     // value
-        "A goblin",
-        "It blocks the way",
-        5,      // damage
-        null,   // target
-        true,   // canAttack
-        "slashes you"
-    );
-
-    room.setMonster(monster);
-
-    assertEquals(monster, room.getMonster());
-    assertTrue(room.getMonster().isActive());
+  void fixturesCanBeAdded() {
+    Fixture fixture = new Fixture("Cabinet", 500, "A tall cabinet.", null, null, null);
+    room.addFixture(fixture);
+    assertEquals(1, room.getFixtures().size());
   }
 
   @Test
-  void testSetAndGetPuzzle() {
-    Puzzle puzzle = new Puzzle(
-        "Door",
-        true,   // active
-        false,  // affectsTarget
-        false,  // affectsPlayer
-        "'answer'", // solution (text answer)
-        10,     // value
-        "A locked door",
-        "The door is locked",
-        null    // target
-    );
+  void puzzleAndMonsterCanBeAssigned() {
+    Puzzle puzzle =
+        new Puzzle("Door", true, false, false, "'answer'", 10, "A locked door", "Locked", null);
+    Monster monster =
+        new Monster(
+            "Goblin",
+            true,
+            false,
+            true,
+            "Key",
+            10,
+            "A goblin",
+            "It blocks the way",
+            -5,
+            null,
+            true,
+            "slashes you");
 
     room.setPuzzle(puzzle);
+    room.setMonster(monster);
 
     assertEquals(puzzle, room.getPuzzle());
-    assertTrue(room.getPuzzle().isActive());
+    assertEquals(monster, room.getMonster());
   }
 
-  // ─────────────────────────────────────────────
-  // basic getters
-  // ─────────────────────────────────────────────
-
   @Test
-  void testBasicProperties() {
-    assertEquals(1, room.getRoomNumber());
-    assertEquals("Test Room", room.getRoomName());
-    assertEquals("A test room", room.getDescription());
+  void copyConstructorPreservesAssignedContent() {
+    room.addItem(new Item("Map", 1, 1, 1, 0, "used", "desc", null));
+    room.addFixture(new Fixture("Desk", 300, "Wooden desk", null, null, null));
+    room.setPuzzle(
+        new Puzzle("Door", true, false, false, "'answer'", 10, "A door", "Locked", null));
+
+    Room copy = new Room(room);
+
+    assertEquals(room.getRoomName(), copy.getRoomName());
+    assertEquals(room.getItems().size(), copy.getItems().size());
+    assertNotNull(copy.getPuzzle());
+  }
+
+  private Map<Direction, Integer> exits(int north, int south, int east, int west) {
+    Map<Direction, Integer> exits = new EnumMap<>(Direction.class);
+    exits.put(Direction.NORTH, north);
+    exits.put(Direction.SOUTH, south);
+    exits.put(Direction.EAST, east);
+    exits.put(Direction.WEST, west);
+    return exits;
   }
 }

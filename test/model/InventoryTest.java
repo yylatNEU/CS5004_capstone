@@ -1,17 +1,18 @@
 package model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for Inventory.
- * <p>
- * Verifies:
- *   - Item addition and removal
- *   - Weight constraints (max capacity = 13)
- *   - Item lookup behavior
- *   - Inventory display formatting
- *   - Edge cases (null, empty, overflow)
+ *
+ * <p>Verifies: - Item addition and removal - Weight constraints (max capacity = 13) - Item lookup
+ * behavior - Inventory display formatting - Edge cases (null, empty, overflow)
  */
 class InventoryTest {
 
@@ -20,13 +21,13 @@ class InventoryTest {
     return new Item(
         name,
         weight,
-        uses,          // maxUses
-        uses,          // usesRemaining
-        0,             // value (irrelevant for Inventory)
-        "used",        // whenUsed
-        "test item",   // description
-        null           // picture
-    );
+        uses, // maxUses
+        uses, // usesRemaining
+        0, // value (irrelevant for Inventory)
+        "used", // whenUsed
+        "test item", // description
+        null // picture
+        );
   }
 
   // ─────────────────────────────────────────────

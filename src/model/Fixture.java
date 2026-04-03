@@ -1,9 +1,8 @@
 package model;
 
 /**
- * Represents a fixture in the adventure game world.
- * Fixtures are heavy, immovable objects found in rooms that can be examined
- * but not picked up by the player. Examples include desks, bookshelves,
+ * Represents a fixture in the adventure game world. Fixtures are heavy, immovable objects found in
+ * rooms that can be examined but not picked up by the player. Examples include desks, bookshelves,
  * and computers.
  */
 public class Fixture {
@@ -20,20 +19,18 @@ public class Fixture {
   /**
    * Constructs a Fixture with the given attributes.
    *
-   * @param name        the name of this fixture
-   * @param weight      how much this fixture weighs (typically 1000+)
+   * @param name the name of this fixture
+   * @param weight how much this fixture weighs (typically 1000+)
    * @param description the text displayed when the fixture is examined
-   * @param puzzle      the name of an associated puzzle, or null
-   * @param states      the state model descriptor, or null
-   * @param picture     the filename of an associated image, or null
-   * @throws IllegalArgumentException if name is null or blank,
-   *     or weight is negative
+   * @param puzzle the name of an associated puzzle, or null
+   * @param states the state model descriptor, or null
+   * @param picture the filename of an associated image, or null
+   * @throws IllegalArgumentException if name is null or blank, or weight is negative
    */
-  public Fixture(String name, int weight, String description,
-      String puzzle, String states, String picture) {
+  public Fixture(
+      String name, int weight, String description, String puzzle, String states, String picture) {
     if (name == null || name.isBlank()) {
-      throw new IllegalArgumentException(
-          "Fixture name cannot be null or blank.");
+      throw new IllegalArgumentException("Fixture name cannot be null or blank.");
     }
     if (weight < 0) {
       throw new IllegalArgumentException("Weight cannot be negative.");
@@ -101,8 +98,8 @@ public class Fixture {
   }
 
   /**
-   * Checks whether this fixture can be moved by the player.
-   * Fixtures weighing 200 or more are considered immovable.
+   * Checks whether this fixture can be moved by the player. Fixtures weighing 200 or more are
+   * considered immovable.
    *
    * @return true if the fixture weighs less than 200
    */

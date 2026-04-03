@@ -1,15 +1,13 @@
 package model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for HealthStatus.
- * <p>
- * Verifies:
- *   - Correct mapping from health values
- *   - Boundary conditions
- *   - Display messages
+ *
+ * <p>Verifies: - Correct mapping from health values - Boundary conditions - Display messages
  */
 class HealthStatusTest {
 
@@ -65,16 +63,12 @@ class HealthStatusTest {
 
   @Test
   void testDisplayMessages() {
-    assertEquals("You feel strong and ready.",
-        HealthStatus.AWAKE.getDisplayMessage());
+    assertEquals("You feel strong and ready.", HealthStatus.AWAKE.getDisplayMessage());
 
-    assertEquals("You feel tired and worn down.",
-        HealthStatus.FATIGUED.getDisplayMessage());
+    assertEquals("You feel tired and worn down.", HealthStatus.FATIGUED.getDisplayMessage());
 
-    assertEquals("You are barely standing...",
-        HealthStatus.WOOZY.getDisplayMessage());
+    assertEquals("You are barely standing...", HealthStatus.WOOZY.getDisplayMessage());
 
-    assertEquals("You have fallen unconscious. Game over.",
-        HealthStatus.SLEEP.getDisplayMessage());
+    assertEquals("You have fallen unconscious. Game over.", HealthStatus.SLEEP.getDisplayMessage());
   }
 }

@@ -1,23 +1,20 @@
 package model;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
- * Handles saving and restoring game state to and from a JSON file.
- * The save file captures the minimal mutable state needed to resume
- * a game session: player stats, inventory contents, item usage,
- * puzzle/monster active status, and room exit states.
+ * Handles saving and restoring game state to and from a JSON file. The save file captures the
+ * minimal mutable state needed to resume a game session: player stats, inventory contents, item
+ * usage, puzzle/monster active status, and room exit states.
  *
- * <p>This class is used by GameModel internally. The controller
- * calls model.save() and model.restore(), which delegate here.</p>
+ * <p>This class is used by GameModel internally. The controller calls model.save() and
+ * model.restore(), which delegate here.
  */
 public class GameSaveManager {
 
@@ -27,7 +24,7 @@ public class GameSaveManager {
    * Saves the current game state to a JSON file.
    *
    * @param player the current player
-   * @param world  the game world containing all rooms and elements
+   * @param world the game world containing all rooms and elements
    * @throws IOException if writing the file fails
    */
   public void save(Player player, GameWorld world) throws IOException {
@@ -48,9 +45,8 @@ public class GameSaveManager {
   }
 
   /**
-   * Restores game state from a previously saved JSON file.
-   * Creates and returns a new Player with the saved stats,
-   * and restores all mutable world state in place.
+   * Restores game state from a previously saved JSON file. Creates and returns a new Player with
+   * the saved stats, and restores all mutable world state in place.
    *
    * @param world the game world (already loaded from the game JSON)
    * @return a new Player with restored stats and inventory
@@ -81,8 +77,8 @@ public class GameSaveManager {
   // ── Save helpers ──────────────────────────────────────────────────────
 
   /**
-   * Builds a JSON array of items currently in the player's inventory.
-   * Each entry records the item name and its remaining uses.
+   * Builds a JSON array of items currently in the player's inventory. Each entry records the item
+   * name and its remaining uses.
    */
   private JSONArray buildInventoryArray(Player player, GameWorld world) {
     JSONArray arr = new JSONArray();
@@ -97,8 +93,8 @@ public class GameSaveManager {
   }
 
   /**
-   * Builds a JSON array recording usesRemaining for every item
-   * in the game world, so we can restore consumed uses.
+   * Builds a JSON array recording usesRemaining for every item in the game world, so we can restore
+   * consumed uses.
    */
   private JSONArray buildItemStatesArray(GameWorld world) {
     JSONArray arr = new JSONArray();
@@ -111,9 +107,7 @@ public class GameSaveManager {
     return arr;
   }
 
-  /**
-   * Builds a JSON object mapping puzzle names to their active status.
-   */
+  /** Builds a JSON object mapping puzzle names to their active status. */
   private JSONObject buildPuzzleStates(GameWorld world) {
     JSONObject obj = new JSONObject();
     for (Puzzle puzzle : world.getAllPuzzles().values()) {
@@ -122,9 +116,7 @@ public class GameSaveManager {
     return obj;
   }
 
-  /**
-   * Builds a JSON object mapping monster names to their active status.
-   */
+  /** Builds a JSON object mapping monster names to their active status. */
   private JSONObject buildMonsterStates(GameWorld world) {
     JSONObject obj = new JSONObject();
     for (Monster monster : world.getAllMonsters().values()) {
@@ -134,9 +126,8 @@ public class GameSaveManager {
   }
 
   /**
-   * Builds a JSON array of room states, capturing the current exit
-   * values for each room (these change when puzzles/monsters
-   * are solved, flipping negative exits to positive).
+   * Builds a JSON array of room states, capturing the current exit values for each room (these
+   * change when puzzles/monsters are solved, flipping negative exits to positive).
    */
   private JSONArray buildRoomStates(GameWorld world) {
     JSONArray arr = new JSONArray();
@@ -167,9 +158,8 @@ public class GameSaveManager {
   // ── Restore helpers ───────────────────────────────────────────────────
 
   /**
-   * Sets the player's health using the available API.
-   * Since Player has no setHealth(), we start from full health
-   * and apply damage to reach the target value.
+   * Sets the player's health using the available API. Since Player has no setHealth(), we start
+   * from full health and apply damage to reach the target value.
    */
   private void applyHealth(Player player, int targetHealth) {
     int damage = player.getHealth() - targetHealth;
@@ -179,9 +169,8 @@ public class GameSaveManager {
   }
 
   /**
-   * Sets the player's score using the available API.
-   * Since Player has no setScore(), we add the target value
-   * directly (player starts at 0 after construction).
+   * Sets the player's score using the available API. Since Player has no setScore(), we add the
+   * target value directly (player starts at 0 after construction).
    */
   private void applyScore(Player player, int targetScore) {
     if (targetScore > 0) {
@@ -189,9 +178,7 @@ public class GameSaveManager {
     }
   }
 
-  /**
-   * Restores usesRemaining for all items tracked in the save file.
-   */
+  /** Restores usesRemaining for all items tracked in the save file. */
   private void restoreItemStates(JSONArray itemsArr, GameWorld world) {
     for (int i = 0; i < itemsArr.length(); i++) {
       JSONObject obj = itemsArr.getJSONObject(i);
@@ -205,12 +192,10 @@ public class GameSaveManager {
   }
 
   /**
-   * Restores the player's inventory from the saved item list.
-   * Looks up each item by name in the game world, sets its
-   * remaining uses, and adds it to the player's inventory.
+   * Restores the player's inventory from the saved item list. Looks up each item by name in the
+   * game world, sets its remaining uses, and adds it to the player's inventory.
    */
-  private void restoreInventory(JSONArray invArr, Player player,
-      GameWorld world) {
+  private void restoreInventory(JSONArray invArr, Player player, GameWorld world) {
     Inventory bag = player.getInventory();
     for (int i = 0; i < invArr.length(); i++) {
       JSONObject obj = invArr.getJSONObject(i);
@@ -225,11 +210,10 @@ public class GameSaveManager {
   }
 
   /**
-   * Restores puzzle active states. If a puzzle was deactivated
-   * in the save, we call deactivate() on it.
+   * Restores puzzle active states. If a puzzle was deactivated in the save, we call deactivate() on
+   * it.
    */
-  private void restorePuzzleStates(JSONObject puzzleObj,
-      GameWorld world) {
+  private void restorePuzzleStates(JSONObject puzzleObj, GameWorld world) {
     for (String key : puzzleObj.keySet()) {
       boolean active = puzzleObj.getBoolean(key);
       Puzzle puzzle = world.getPuzzle(key);
@@ -240,11 +224,10 @@ public class GameSaveManager {
   }
 
   /**
-   * Restores monster active states. If a monster was deactivated
-   * in the save, we call deactivate() on it.
+   * Restores monster active states. If a monster was deactivated in the save, we call deactivate()
+   * on it.
    */
-  private void restoreMonsterStates(JSONObject monsterObj,
-      GameWorld world) {
+  private void restoreMonsterStates(JSONObject monsterObj, GameWorld world) {
     for (String key : monsterObj.keySet()) {
       boolean active = monsterObj.getBoolean(key);
       Monster monster = world.getMonster(key);
@@ -255,9 +238,8 @@ public class GameSaveManager {
   }
 
   /**
-   * Restores room exit values from the saved data.
-   * This handles the case where puzzle/monster resolution
-   * flipped negative exits to positive.
+   * Restores room exit values from the saved data. This handles the case where puzzle/monster
+   * resolution flipped negative exits to positive.
    */
   private void restoreRoomStates(JSONArray roomsArr, GameWorld world) {
     for (int i = 0; i < roomsArr.length(); i++) {
@@ -295,9 +277,8 @@ public class GameSaveManager {
   /**
    * Extracts the list of items from a player's inventory.
    *
-   * <p>TODO: Replace with Inventory.getItems() once Vanessa adds
-   * that method. Current workaround checks all world items against
-   * the inventory by name.</p>
+   * <p>TODO: Replace with Inventory.getItems() once Vanessa adds that method. Current workaround
+   * checks all world items against the inventory by name.
    */
   private List<Item> getInventoryItems(Player player, GameWorld world) {
     List<Item> result = new ArrayList<>();

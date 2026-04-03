@@ -9,9 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for the Item class.
- */
+/** Unit tests for the Item class. */
 public class ItemTest {
 
   private Item sword;
@@ -20,50 +18,47 @@ public class ItemTest {
 
   @BeforeEach
   void setUp() {
-    sword = new Item("Sword", 5, 10, 10, 15,
-        "You swing the sword!", "A sharp blade.", "sword.png");
-    potion = new Item("Potion", 2, 1, 1, 10,
-        "You drink the potion.", "A healing potion.", null);
-    ticket = new Item("Ticket", 1, 1, 0, 5,
-        "You use the ticket.", "A museum ticket.", null);
+    sword = new Item("Sword", 5, 10, 10, 15, "You swing the sword!", "A sharp blade.", "sword.png");
+    potion = new Item("Potion", 2, 1, 1, 10, "You drink the potion.", "A healing potion.", null);
+    ticket = new Item("Ticket", 1, 1, 0, 5, "You use the ticket.", "A museum ticket.", null);
   }
 
   // ── Constructor validation ──────────────────────────────────────────
 
   @Test
   void testConstructorNullName() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Item(null, 1, 1, 1, 0, "msg", "desc", null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Item(null, 1, 1, 1, 0, "msg", "desc", null));
   }
 
   @Test
   void testConstructorBlankName() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Item("  ", 1, 1, 1, 0, "msg", "desc", null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Item("  ", 1, 1, 1, 0, "msg", "desc", null));
   }
 
   @Test
   void testConstructorNegativeWeight() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Item("Key", -1, 1, 1, 0, "msg", "desc", null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Item("Key", -1, 1, 1, 0, "msg", "desc", null));
   }
 
   @Test
   void testConstructorNegativeMaxUses() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Item("Key", 1, -1, 0, 0, "msg", "desc", null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Item("Key", 1, -1, 0, 0, "msg", "desc", null));
   }
 
   @Test
   void testConstructorUsesRemainingTooHigh() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Item("Key", 1, 3, 5, 0, "msg", "desc", null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Item("Key", 1, 3, 5, 0, "msg", "desc", null));
   }
 
   @Test
   void testConstructorUsesRemainingNegative() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Item("Key", 1, 3, -1, 0, "msg", "desc", null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Item("Key", 1, 3, -1, 0, "msg", "desc", null));
   }
 
   @Test
@@ -198,14 +193,12 @@ public class ItemTest {
 
   @Test
   void testSetUsesRemainingNegative() {
-    assertThrows(IllegalArgumentException.class, () ->
-        sword.setUsesRemaining(-1));
+    assertThrows(IllegalArgumentException.class, () -> sword.setUsesRemaining(-1));
   }
 
   @Test
   void testSetUsesRemainingAboveMax() {
-    assertThrows(IllegalArgumentException.class, () ->
-        sword.setUsesRemaining(11));
+    assertThrows(IllegalArgumentException.class, () -> sword.setUsesRemaining(11));
   }
 
   // ── toString ────────────────────────────────────────────────────────
@@ -217,8 +210,7 @@ public class ItemTest {
 
   @Test
   void testToStringLowerCase() {
-    Item item = new Item("golden key", 1, 1, 1, 5,
-        "msg", "desc", null);
+    Item item = new Item("golden key", 1, 1, 1, 5, "msg", "desc", null);
     assertEquals("GOLDEN KEY", item.toString());
   }
 }

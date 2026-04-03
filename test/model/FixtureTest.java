@@ -9,9 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for the Fixture class.
- */
+/** Unit tests for the Fixture class. */
 public class FixtureTest {
 
   private Fixture computer;
@@ -20,33 +18,36 @@ public class FixtureTest {
 
   @BeforeEach
   void setUp() {
-    computer = new Fixture("Computer", 1000,
-        "A computer with a password screen.", "Password",
-        null, "computer.png");
-    desk = new Fixture("Desk", 500,
-        "A large wooden desk.", null, null, null);
-    lightChair = new Fixture("Chair", 50,
-        "A small wooden chair.", null, null, null);
+    computer =
+        new Fixture(
+            "Computer",
+            1000,
+            "A computer with a password screen.",
+            "Password",
+            null,
+            "computer.png");
+    desk = new Fixture("Desk", 500, "A large wooden desk.", null, null, null);
+    lightChair = new Fixture("Chair", 50, "A small wooden chair.", null, null, null);
   }
 
   // ── Constructor validation ──────────────────────────────────────────
 
   @Test
   void testConstructorNullName() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Fixture(null, 100, "desc", null, null, null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Fixture(null, 100, "desc", null, null, null));
   }
 
   @Test
   void testConstructorBlankName() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Fixture("  ", 100, "desc", null, null, null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Fixture("  ", 100, "desc", null, null, null));
   }
 
   @Test
   void testConstructorNegativeWeight() {
-    assertThrows(IllegalArgumentException.class, () ->
-        new Fixture("Table", -1, "desc", null, null, null));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Fixture("Table", -1, "desc", null, null, null));
   }
 
   @Test
@@ -69,8 +70,7 @@ public class FixtureTest {
 
   @Test
   void testGetDescription() {
-    assertEquals("A computer with a password screen.",
-        computer.getDescription());
+    assertEquals("A computer with a password screen.", computer.getDescription());
   }
 
   @Test
@@ -90,8 +90,7 @@ public class FixtureTest {
 
   @Test
   void testGetStatesWithValue() {
-    Fixture f = new Fixture("Lever", 300, "A lever.",
-        null, "on,off", null);
+    Fixture f = new Fixture("Lever", 300, "A lever.", null, "on,off", null);
     assertEquals("on,off", f.getStates());
   }
 
@@ -114,8 +113,7 @@ public class FixtureTest {
 
   @Test
   void testIsMovableFalseAtThreshold() {
-    Fixture f = new Fixture("Cabinet", 200, "desc",
-        null, null, null);
+    Fixture f = new Fixture("Cabinet", 200, "desc", null, null, null);
     assertFalse(f.isMovable());
   }
 
@@ -126,8 +124,7 @@ public class FixtureTest {
 
   @Test
   void testIsMovableTrueJustBelow() {
-    Fixture f = new Fixture("Stool", 199, "desc",
-        null, null, null);
+    Fixture f = new Fixture("Stool", 199, "desc", null, null, null);
     assertTrue(f.isMovable());
   }
 
@@ -140,8 +137,7 @@ public class FixtureTest {
 
   @Test
   void testToStringLowerCase() {
-    Fixture f = new Fixture("big bookshelf", 800, "desc",
-        null, null, null);
+    Fixture f = new Fixture("big bookshelf", 800, "desc", null, null, null);
     assertEquals("BIG BOOKSHELF", f.toString());
   }
 }

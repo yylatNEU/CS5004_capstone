@@ -1,7 +1,11 @@
 package model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerTest {
 
@@ -22,16 +26,20 @@ class PlayerTest {
 
   @Test
   void testConstructorInvalidName_null() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      new Player(null, 1);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          new Player(null, 1);
+        });
   }
 
   @Test
   void testConstructorInvalidName_blank() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      new Player("   ", 1);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          new Player("   ", 1);
+        });
   }
 
   // ─────────────────────────────────────────────
@@ -58,9 +66,11 @@ class PlayerTest {
   void testTakeDamageNegative() {
     Player p = new Player("Bob", 1);
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      p.takeDamage(-10);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          p.takeDamage(-10);
+        });
   }
 
   @Test

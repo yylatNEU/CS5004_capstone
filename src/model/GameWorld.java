@@ -1,44 +1,40 @@
 package model;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Represents the entire game world.
- */
+/** Represents the complete loaded game world. */
 public class GameWorld {
-  private String gameName;
-  private String version;
-  private static final Map<Integer, Room>   rooms    = new HashMap<>();
-  private final Map<String, Item>    items    = new HashMap<>();
-  private final Map<String, Fixture> fixtures = new HashMap<>();
-  private final Map<String, Puzzle>  puzzles  = new HashMap<>();
-  private final Map<String, Monster> monsters = new HashMap<>();
+
+  private final String gameName;
+  private final String version;
+  private final Map<Integer, Room> rooms;
+  private final Map<String, Item> items;
+  private final Map<String, Fixture> fixtures;
+  private final Map<String, Puzzle> puzzles;
+  private final Map<String, Monster> monsters;
 
   /**
-   * Constructs a new GameWorld with the given name and version.
-   * @param gameName name
-   * @param version version
+   * Creates a new world.
+   *
+   * @param gameName the game name
+   * @param version the game version
    */
   public GameWorld(String gameName, String version) {
     this.gameName = gameName;
-    this.version  = version;
+    this.version = version;
+    this.rooms = new HashMap<>();
+    this.items = new HashMap<>();
+    this.fixtures = new HashMap<>();
+    this.puzzles = new HashMap<>();
+    this.monsters = new HashMap<>();
   }
 
   /**
-   * Trimming whitespace and converting it to uppercase
-   * @param name name
-   * @return String
-   */
-  private String normalize(String name) {
-    return name.trim().toUpperCase();
-  }
-
-  // All these add methods are call by JsonGameLoader.
-
-  /**
-   * Add room to game world.
-   * @param room room o
+   * Adds a room to the world.
+   *
+   * @param room the room to add
    */
   public void addRoom(Room room) {
     if (room != null) {
@@ -47,8 +43,9 @@ public class GameWorld {
   }
 
   /**
-   * Add item.
-   * @param item item o
+   * Adds an item definition to the world.
+   *
+   * @param item the item to add
    */
   public void addItem(Item item) {
     if (item != null) {
@@ -57,8 +54,9 @@ public class GameWorld {
   }
 
   /**
-   * Add fixture.
-   * @param fixture fixture o
+   * Adds a fixture definition to the world.
+   *
+   * @param fixture the fixture to add
    */
   public void addFixture(Fixture fixture) {
     if (fixture != null) {
@@ -67,8 +65,9 @@ public class GameWorld {
   }
 
   /**
-   * Add puzzle.
-   * @param puzzle puzzle o
+   * Adds a puzzle definition to the world.
+   *
+   * @param puzzle the puzzle to add
    */
   public void addPuzzle(Puzzle puzzle) {
     if (puzzle != null) {
@@ -77,8 +76,9 @@ public class GameWorld {
   }
 
   /**
-   * Add monster.
-   * @param monster monster o
+   * Adds a monster definition to the world.
+   *
+   * @param monster the monster to add
    */
   public void addMonster(Monster monster) {
     if (monster != null) {
@@ -86,120 +86,127 @@ public class GameWorld {
     }
   }
 
-  // All these getters are call by GameModel
-
   /**
-   * Get room.
-   * @param roomNumber room num
-   * @return room
+   * Returns a room by room number.
+   *
+   * @param roomNumber the room number
+   * @return the room, or {@code null}
    */
-  public static Room getRoom(int roomNumber) {
+  public Room getRoom(int roomNumber) {
     return rooms.get(roomNumber);
   }
 
   /**
-   * Get item.
-   * @param name item name
-   * @return item
+   * Returns an item definition by name.
+   *
+   * @param name the item name
+   * @return the item, or {@code null}
    */
   public Item getItem(String name) {
-    if (name == null) return null;
-    return items.get(normalize(name));
+    return name == null ? null : items.get(normalize(name));
   }
 
   /**
-   * Get fixture.
-   * @param name fixture name
-   * @return fixture
+   * Returns a fixture definition by name.
+   *
+   * @param name the fixture name
+   * @return the fixture, or {@code null}
    */
   public Fixture getFixture(String name) {
-    if (name == null) return null;
-    return fixtures.get(normalize(name));
+    return name == null ? null : fixtures.get(normalize(name));
   }
 
   /**
-   * Get puzzle.
-   * @param name puzzle name
-   * @return puzzle
+   * Returns a puzzle definition by name.
+   *
+   * @param name the puzzle name
+   * @return the puzzle, or {@code null}
    */
   public Puzzle getPuzzle(String name) {
-    if (name == null) return null;
-    return puzzles.get(normalize(name));
+    return name == null ? null : puzzles.get(normalize(name));
   }
 
   /**
-   * Get monster.
-   * @param name monster name
-   * @return monster
+   * Returns a monster definition by name.
+   *
+   * @param name the monster name
+   * @return the monster, or {@code null}
    */
   public Monster getMonster(String name) {
-    if (name == null) return null;
-    return monsters.get(normalize(name));
+    return name == null ? null : monsters.get(normalize(name));
   }
 
   /**
-   * Returns all items in the world.
-   * @return items map
+   * Returns all known items.
+   *
+   * @return an immutable item map
    */
   public Map<String, Item> getAllItems() {
-    return java.util.Collections.unmodifiableMap(items);
+    return Collections.unmodifiableMap(items);
   }
 
   /**
-   * Returns all puzzles in the world.
-   * @return puzzles map
+   * Returns all known puzzles.
+   *
+   * @return an immutable puzzle map
    */
   public Map<String, Puzzle> getAllPuzzles() {
-    return java.util.Collections.unmodifiableMap(puzzles);
+    return Collections.unmodifiableMap(puzzles);
   }
 
   /**
-   * Returns all monsters.
-   * @return monsters map
+   * Returns all known monsters.
+   *
+   * @return an immutable monster map
    */
   public Map<String, Monster> getAllMonsters() {
-    return java.util.Collections.unmodifiableMap(monsters);
+    return Collections.unmodifiableMap(monsters);
   }
 
   /**
-   * Get starting room.
-   * @return starting room
+   * Returns the starting room.
+   *
+   * @return room 1, or {@code null}
    */
   public Room getStartingRoom() {
     return rooms.get(1);
   }
 
   /**
-   * Get game name.
-   * @return game name
+   * Returns the game name.
+   *
+   * @return the game name
    */
   public String getGameName() {
     return gameName;
   }
 
   /**
-   * Get version.
-   * @return version
+   * Returns the game version.
+   *
+   * @return the version string
    */
-  public String getVersion()  {
+  public String getVersion() {
     return version;
   }
 
   /**
-   * Get room count.
-   * @return count
+   * Returns the number of rooms.
+   *
+   * @return the room count
    */
   public int getRoomCount() {
     return rooms.size();
   }
 
-  /**
-   * Returns a string representation of the game world summary.
-   * @return string representation
-   */
   @Override
   public String toString() {
-    return String.format("GameWorld[name=%s, rooms=%d, items=%d, fixtures=%d, puzzles=%d, monsters=%d]",
-            gameName, rooms.size(), items.size(), fixtures.size(), puzzles.size(), monsters.size());
+    return String.format(
+        "GameWorld[name=%s, rooms=%d, items=%d, fixtures=%d, puzzles=%d, monsters=%d]",
+        gameName, rooms.size(), items.size(), fixtures.size(), puzzles.size(), monsters.size());
+  }
+
+  private String normalize(String name) {
+    return name.trim().toUpperCase();
   }
 }
