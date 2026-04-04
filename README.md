@@ -5,6 +5,12 @@
 
 ---
 
+## UML Models & Written Scenarios
+
+See [HW8_UML models & Written Scenarios.pdf](HW8_UML%20models%20%26%20Written%20Scenarios.pdf) for the refined UML class diagram, object diagrams, sequence diagrams, and written scenarios.
+
+---
+
 ## How to Run
 
 1. Open the project in IntelliJ IDEA.
