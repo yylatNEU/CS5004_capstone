@@ -1,64 +1,102 @@
-# CS5004 Capstone HW8 Documentation
+# CS5004 HW8 — Data-Driven Adventure Game Engine
 
-This repository implements a console-based adventure game engine using an MVC-style structure. For HW8, the documentation set now includes refined static UML, dynamic UML, refined textual scenarios, and a design summary explaining how the current implementation evolved.
+**Team:** NO BUG  
+**Members:** Yu Chen, MinHsun Hsieh, Ying-Lou Lu, Yenyu Liu, Shelly (Beiyi) Xu
 
-## Documentation Set
+---
 
-- UML diagrams: [docs/UML.md](/Users/yenyu/Desktop/CS education/5004/CS5004_capstone/docs/UML.md)
-- Refined scenarios: [docs/SCENARIOS.md](/Users/yenyu/Desktop/CS education/5004/CS5004_capstone/docs/SCENARIOS.md)
+## How to Run
 
-## Current Design
+1. Open the project in IntelliJ IDEA.
+2. Ensure `lib/json-20251224.jar` is on the classpath (Project Structure → Libraries).
+3. Run `GameEngineApp.main()` in `src/enginedriver/`.
+4. The default game file is `./resources/align_quest_game_elements.json`.
 
-The system is organized into four main areas:
+---
 
-1. Application bootstrap
-   `GameEngineApp` loads the JSON game definition, creates the model and controller, and starts the game loop.
+## Design Overview
 
-2. Controller layer
-   `GameController` is responsible for console input/output and command parsing. It depends only on `IGameModel`, which keeps the controller decoupled from concrete model classes.
+The system follows the **Model-View-Controller (MVC)** pattern with three layers:
 
-3. Model and domain layer
-   `GameModel` owns the active game state and enforces the rules for movement, monster attacks, puzzle solving, item usage, scoring, and end-game checks. The domain objects include `GameWorld`, `Room`, `Player`, `Inventory`, `Item`, `Fixture`, `Puzzle`, and `Monster`.
+- **Engine Driver** (`GameEngineApp`) — application entry point; loads the JSON game file, wires the model and controller, and starts the game loop.
+- **Controller** (`GameController`) — reads user input from a `Readable`, dispatches commands to the model via the `IGameModel` interface, and writes output to an `Appendable`. The controller has no knowledge of concrete model classes.
+- **Model** (`GameModel` + domain classes) — owns all game state and enforces gameplay rules. Returns `String` messages to the controller; performs no I/O.
 
-4. Persistence and loading
-   `JsonGameLoader` constructs the initial `GameWorld` from JSON. `GameSaveManager` captures and restores mutable runtime state such as player stats, inventory, room exits, and active puzzle or monster status. In the current implementation, persistence uses the fixed file `./savegame.json`.
+---
 
-## Design Rationale
+## Class / Interface Descriptions
 
-- `IGameModel` provides a narrow contract between controller and model. This keeps the controller simple and makes the design cleaner for testing and future UI changes.
-- `GameWorld` acts as the registry of loaded game content, while `GameModel` manages session-specific state and rules.
-- `Room` aggregates the content the player directly experiences: exits, items, fixtures, an optional puzzle, and an optional monster.
-- `Inventory` isolates weight-limit logic and item lookup from the player object.
-- Save and restore are separated into `GameSaveManager` so persistence concerns do not spread across the controller or core game-rule logic.
+### enginedriver
 
-## Evolution From HW7
+| Class | Purpose |
+|-------|---------|
+| `GameEngineApp` | Entry point. Loads JSON, creates model and controller, starts the game loop. |
 
-The repository does not include a separate HW7 snapshot or branch, so this section is based on the current code structure and the available Git history.
+### controller
 
-From the commit history, the design appears to have evolved in these steps:
+| Class | Purpose |
+|-------|---------|
+| `GameController` | Console game loop. Parses commands (move, look, take, drop, use, examine, answer, save, restore, quit) and delegates to `IGameModel`. |
 
-1. Core domain objects were introduced first.
-   Early commits added `Player`, `Inventory`, `HealthStatus`, `Room`, `Item`, and `Fixture`. This established the basic game state and object model.
+### model
 
-2. The model contract and rule engine were added next.
-   Later commits introduced `GameModel` and `IGameModel`. This is the major architectural refinement because it separates command handling from rule enforcement and makes the controller depend on an interface rather than concrete classes.
+| Class / Interface | Purpose |
+|-------------------|---------|
+| `IGameModel` | Interface defining the controller-facing contract. Decouples the controller from all concrete model classes. |
+| `GameModel` | Implements `IGameModel`. Orchestrates movement, combat, puzzle solving, inventory management, scoring, and save/restore. |
+| `GameWorld` | Centralized registry of all `Room`, `Item`, `Fixture`, `Puzzle`, and `Monster` objects loaded from JSON. |
+| `JsonGameLoader` | Parses a JSON game file and constructs the `GameWorld`. Enables data-driven game creation. |
+| `GameSaveManager` | Serializes/deserializes mutable game state (player stats, inventory, puzzle/monster status, room exits) to `savegame.json`. |
+| `Player` | Tracks player name, health (0–100), score, current room number, and inventory. |
+| `Inventory` | Manages collected items with a weight limit of 13. Supports add, remove, and lookup. |
+| `Room` | Represents a location. Contains directional exits, items, fixtures, an optional puzzle, and an optional monster. |
+| `Item` | A collectible object with limited uses, weight, value, and descriptive text. |
+| `Fixture` | A heavy, immovable object (e.g. desk, bookshelf) that can be examined but not picked up. |
+| `Puzzle` | Gates blocked exits. Solved via a text answer or by using a specific item. Awards score on completion. |
+| `Monster` | Blocks exits and attacks on movement. Defeated by using the correct item. Awards score on defeat. |
+| `Direction` | Enum (`NORTH`, `SOUTH`, `EAST`, `WEST`) with string parsing. |
+| `HealthStatus` | Enum (`AWAKE`, `FATIGUED`, `WOOZY`, `SLEEP`) derived from current health. |
 
-3. Persistence support was added after the core gameplay model.
-   `GameSaveManager` and item restore support were added to preserve mutable session state. This extends the design beyond simple in-memory gameplay and is an important HW8-level refinement.
+---
 
-4. Controller and app wiring were finalized afterward.
-   Subsequent commits introduced and refined `GameController` and `GameEngineApp`, giving the system a clearer MVC-style flow with explicit startup, I/O control, and model interaction.
+## Design Evolution from HW7
 
-5. The current codebase reflects a more refined decomposition than a typical earlier milestone.
-   In particular, responsibilities are now separated across bootstrap, controller, model, domain objects, loading, and persistence rather than being concentrated in a smaller number of classes.
+HW7 was a pure analysis phase — UML diagrams and written scenarios describing a proposed design. HW8 is the working implementation. The key changes are:
 
-## How the UML Matches the Code
+1. **Architecture: single GameEngine → MVC.** HW7 proposed a monolithic `GameEngine` class. HW8 separates responsibilities into `GameEngineApp` (bootstrap), `GameController` (I/O), and `GameModel` (logic), connected through the `IGameModel` interface.
 
-- The static domain diagram shows the long-lived structural relationships among the game classes.
-- The architecture diagram isolates the controller, bootstrap, loading, and save/restore responsibilities so the design is easier to read than a single dense diagram.
-- The sequence diagrams show two required dynamic views: normal gameplay and save/restore behavior.
+2. **Combat: Battle class → inline monster attacks.** HW7 designed a standalone `Battle` class with turn-based combat. In implementation, monsters attack the player automatically on move attempts, and the player defeats monsters by using the correct item. A separate Battle class was unnecessary for this interaction model.
 
-## Notes for Submission
+3. **Puzzles: password collection → text answers and item usage.** HW7 envisioned collecting clue fragments to assemble a password. HW8 puzzles are solved directly by typing a text answer or by using a specific item, driven by the JSON data.
 
-- If your instructor wants image exports instead of Mermaid source, the diagrams in [docs/UML.md](/Users/yenyu/Desktop/CS education/5004/CS5004_capstone/docs/UML.md) can be rendered and exported as PNG or PDF.
-- If you want the documentation to describe a specific HW7 baseline more precisely, add that baseline branch, commit, or prior README and update the evolution section to reference it directly.
+4. **Economy: Store / ItemToPurchase removed.** HW7 included an in-game store. This was not required by the game data specification, so it was removed to keep the design focused.
+
+5. **Map / Tile system → room-number connections.** HW7 proposed a `Map` class with a tile-based grid. HW8 connects rooms via directional exit values (positive = passable, 0 = wall, negative = blocked), which matches the JSON data format directly.
+
+6. **Player attributes simplified.** HW7 included EXP, level, strength, and coin. HW8 uses health, score, and inventory — sufficient for the game scenarios provided.
+
+7. **New components added.** `JsonGameLoader` (data-driven loading), `GameSaveManager` (persistence), `HealthStatus` (health categorization), and `Direction` (enum with parsing) were introduced during implementation to support required functionality.
+
+---
+
+## Project Structure
+
+```
+src/
+  enginedriver/    GameEngineApp.java
+  controller/      GameController.java
+  model/           IGameModel, GameModel, GameWorld, JsonGameLoader,
+                   GameSaveManager, Player, Inventory, Room, Item,
+                   Fixture, Puzzle, Monster, Direction, HealthStatus
+test/
+  model/           Unit tests for all model classes + TestWorldFactory
+Resources/         JSON game data files
+lib/               json-20251224.jar
+```
+
+---
+
+## External Dependencies
+
+- `json-20251224.jar` — JSON parsing (included in `lib/`).
+- JUnit 5 — unit testing (test scope only).
