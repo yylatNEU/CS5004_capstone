@@ -76,7 +76,7 @@ public class GameEngineApp {
     BufferedReader stringReader = new BufferedReader(new StringReader(s));
     GameEngineApp app =
         new GameEngineApp(
-            "./resources/align_quest_game_elements.json",
+            "./resources/alignquest.json",
             new InputStreamReader(System.in),
             System.out);
     app.start();

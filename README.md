@@ -16,7 +16,7 @@ See [HW8_UML models & Written Scenarios.pdf](HW8_UML%20models%20%26%20Written%20
 1. Open the project in IntelliJ IDEA.
 2. Ensure `lib/json-20251224.jar` is on the classpath (Project Structure → Libraries).
 3. Run `GameEngineApp.main()` in `src/enginedriver/`.
-4. The default game file is `./resources/align_quest_game_elements.json`.
+4. The default game file is `./resources/alignquest.json`.
 
 ---
 
