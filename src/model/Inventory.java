@@ -134,4 +134,16 @@ public class Inventory {
     }
     return -1;
   }
+
+  /**
+   * Returns the list of items player is keeping
+   * @return list of items
+   */
+  public List<String> getItemNames() {
+    List<String> names = new ArrayList<>();
+    for (Item item : storage) {
+      names.add(item.getName());
+    }
+    return names;
+  }
 }
