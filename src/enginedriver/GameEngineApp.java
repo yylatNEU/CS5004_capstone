@@ -1,14 +1,17 @@
 package enginedriver;
 
-import controller.GameController;
-import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-import model.GameModel;
+import javax.swing.SwingUtilities;
+
+import controller.GameController;
+import view.MainFrame;
 import model.GameWorld;
-import model.IGameModel;
 import model.JsonGameLoader;
+import model.IGameModel;
+import model.GameModel;
 
 /**
  * Entry point for the Adventure Game Engine. Wires together the JSON loader, game model, and
@@ -72,13 +75,58 @@ public class GameEngineApp {
    * @throws IOException if the game file cannot be read or output fails
    */
   public static void main(String[] args) throws IOException {
-    String s = "Sir Mix-A-Lot\nT NOTEBOOK\nN\nT HAIR CLIPPERS\nT KEY\nD NOTEBOOK\nQuit";
-    BufferedReader stringReader = new BufferedReader(new StringReader(s));
-    GameEngineApp app =
+    if (args.length < 2) {
+      System.out.println("Usage: java -jar game_engine.jar <filename> -text|-graphics|-batch [source] [target]");
+      return;
+    }
+
+    String filename = args[0];
+    String mode = args[1];
+
+    switch (mode) {
+      case "-text":
         new GameEngineApp(
-            "./resources/alignquest.json",
-            new InputStreamReader(System.in),
-            System.out);
-    app.start();
+                filename,
+                new InputStreamReader(System.in),
+                System.out
+        ).start();
+        break;
+
+      case "-graphics":
+        SwingUtilities.invokeLater(() -> {
+          try {
+            JsonGameLoader loader = new JsonGameLoader();
+            GameWorld world = loader.load(filename);
+            IGameModel model = new GameModel(world);
+            MainFrame frame = new MainFrame(world.getGameName());
+            // GraphicsController 之後補上
+            frame.display();
+          } catch (IOException e) {
+            System.err.println("Failed to load game: " + e.getMessage());
+          }
+        });
+        break;
+
+      case "-batch":
+        if (args.length == 3) {
+          new GameEngineApp(
+                  filename,
+                  new FileReader(args[2]),
+                  System.out
+          ).start();
+        } else if (args.length == 4) {
+          new GameEngineApp(
+                  filename,
+                  new FileReader(args[2]),
+                  new FileWriter(args[3])
+          ).start();
+        } else {
+          System.out.println("Usage: -batch <source> [target]");
+        }
+        break;
+
+      default:
+        System.out.println("Unknown mode: " + mode);
+    }
   }
 }
