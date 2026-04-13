@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** Represents a player's inventory with a fixed carry capacity. */
@@ -133,5 +134,13 @@ public class Inventory {
       }
     }
     return -1;
+  }
+
+  /**
+   * Returns an unmodifiable view of all items currently in the inventory.
+   * @return an unmodifiable list of items
+   */
+  public List<Item> getItems() {
+    return Collections.unmodifiableList(storage);
   }
 }

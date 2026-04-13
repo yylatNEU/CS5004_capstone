@@ -1,5 +1,7 @@
 package model;
 
+import java.util.List;
+
 /** Defines the controller-facing contract for the game model. */
 public interface IGameModel {
 
@@ -99,4 +101,46 @@ public interface IGameModel {
    * @return the restore result message
    */
   String restore();
+
+  /**
+   * Returns the room the player is currently in.
+   *
+   * @return the current room
+   */
+  Room getCurrentRoom();
+
+  /**
+   * Returns the current player object.
+   *
+   * @return the player
+   */
+  Player getPlayer();
+
+  /**
+   * Returns the name of this game as declared in the game JSON file.
+   *
+   * @return the game name string
+   */
+  String getGameName();
+
+  /**
+   * Returns the names of all items currently in the player's inventory.
+   *
+   * @return a list of item name strings
+   */
+  List<String> getInventoryItemNames();
+
+  /**
+   * Returns the names of all items currently sitting in the player's room.
+   *
+   * @return a list of item name strings
+   */
+  List<String> getRoomItemNames();
+
+  /**
+   * Returns the names of all objects the player can examine in the current room.
+   *
+   * @return a list of examinable object names, never {@code null}
+   */
+  List<String> getExaminableNames();
 }

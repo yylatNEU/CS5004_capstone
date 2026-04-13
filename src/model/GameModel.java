@@ -1,6 +1,7 @@
 package model;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /** Core game model that owns the active player session and applies gameplay rules. */
@@ -246,6 +247,93 @@ public class GameModel implements IGameModel {
     } catch (IOException exception) {
       return "Failed to restore game: " + exception.getMessage();
     }
+  }
+
+  /**
+   * Returns the room the player is currently in.
+   *
+   * @return the current room
+   */
+  @Override
+  public Room getCurrentRoom() {
+    return currentRoom();
+  }
+
+  /**
+   * Returns the current player object.
+   *
+   * @return the player
+   */
+  @Override
+  public Player getPlayer() {
+    return player;
+  }
+
+  /**
+   * Returns the name of this game as declared in the game JSON file.
+   *
+   * @return the game name string
+   */
+  @Override
+  public String getGameName() {
+    return world.getGameName();
+  }
+
+  /**
+   * Returns the names of all items currently in the player's inventory.
+   *
+   * @return a list of item name strings
+   */
+  @Override
+  public List<String> getInventoryItemNames() {
+    List<String> names = new ArrayList<>();
+    if (player == null) {
+      return names;
+    }
+
+    for (Item item : player.getInventory().getItems()) {
+      names.add(item.getName());
+    }
+    return names;
+  }
+
+  /**
+   * Returns the names of all items currently sitting in the player's room.
+   *
+   * @return a list of item name strings
+   */
+  @Override
+  public List<String> getRoomItemNames() {
+    List<String> names = new ArrayList<>();
+    Room room = getCurrentRoom();
+    if (room == null) {
+      return names;
+    }
+    for (Item item : room.getItems()) {
+      names.add(item.getName());
+    }
+    return names;
+  }
+
+  /**
+   * Returns the names of all objects the player can examine in the current room.
+   *
+   * @return a list of examinable object names, never {@code null}
+   */
+  @Override
+  public List<String> getExaminableNames() {
+    List<String> names = new ArrayList<>();
+    Room room = getCurrentRoom();
+    if (room == null) {
+      return names;
+    }
+    for (Item item : room.getItems()) {
+      names.add(item.getName());
+    }
+    for (Fixture fixture : room.getFixtures()) {
+      names.add(fixture.getName());
+    }
+    return names;
   }
 
   private Room currentRoom() {
