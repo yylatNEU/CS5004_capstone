@@ -336,6 +336,32 @@ public class GameModel implements IGameModel {
     return names;
   }
 
+  /**
+   * Get item image.
+   * @param itemName name of the item
+   * @return the picture file name.
+   */
+  @Override
+  public String getItemImage(String itemName) {
+    if (itemName == null || player == null) {
+      return null;
+    }
+
+    Item inventoryItem = player.getInventory().getItem(itemName);
+    if (inventoryItem != null) {
+      return inventoryItem.getPicture();
+    }
+
+    Room room = getCurrentRoom();
+    if (room != null) {
+      Item roomItem = findItemInList(room.getItems(), itemName);
+      if (roomItem != null) {
+        return roomItem.getPicture();
+      }
+    }
+    return null;
+  }
+
   private Room currentRoom() {
     return world.getRoom(player.getCurrentRoomNumber());
   }
