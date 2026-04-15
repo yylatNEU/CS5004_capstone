@@ -12,6 +12,7 @@ import model.GameWorld;
 import model.JsonGameLoader;
 import model.IGameModel;
 import model.GameModel;
+import view.GraphicsController;
 
 /**
  * Entry point for the Adventure Game Engine. Wires together the JSON loader, game model, and
@@ -99,7 +100,14 @@ public class GameEngineApp {
             GameWorld world = loader.load(filename);
             IGameModel model = new GameModel(world);
             MainFrame frame = new MainFrame(world.getGameName());
-            // GraphicsController 之後補上
+            GraphicsController gc = new GraphicsController(model, frame);
+
+            String playerName = frame.promptInput("Welcome", "Enter your name:");
+            if (playerName == null || playerName.isBlank()) {
+              playerName = "Player";
+            }
+            model.setPlayerName(playerName);
+
             frame.display();
           } catch (IOException e) {
             System.err.println("Failed to load game: " + e.getMessage());
