@@ -143,7 +143,7 @@ public interface IGameModel {
    * @return a list of examinable object names, never {@code null}
    */
   List<String> getExaminableNames();
-  
+
   /**
    * Get item image.
    * @param itemName name of the item

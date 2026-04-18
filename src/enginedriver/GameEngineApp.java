@@ -63,17 +63,19 @@ public class GameEngineApp {
   }
 
   /**
-   * Application entry point for smoke testing and manual play.
+   * Application entry point. Dispatches to text, graphics, or batch mode based on command-line
+   * arguments.
    *
-   * <p>Two modes are available (comment/uncomment as needed):
+   * <p>Usage:
    *
-   * <ul>
-   *   <li>Synthetic input: feeds pre-written commands automatically
-   *   <li>Manual input: reads commands from the keyboard (System.in)
-   * </ul>
+   * <pre>
+   *   java -jar game_engine.jar &lt;filename&gt; -text
+   *   java -jar game_engine.jar &lt;filename&gt; -graphics
+   *   java -jar game_engine.jar &lt;filename&gt; -batch &lt;source&gt; [target]
+   * </pre>
    *
-   * @param args command-line arguments (not used)
-   * @throws IOException if the game file cannot be read or output fails
+   * @param args command-line arguments: game file, mode flag, optional batch source and target
+   * @throws IOException if the game file or batch streams cannot be read or written
    */
   public static void main(String[] args) throws IOException {
     if (args.length < 2) {
@@ -100,7 +102,7 @@ public class GameEngineApp {
             GameWorld world = loader.load(filename);
             IGameModel model = new GameModel(world);
             MainFrame frame = new MainFrame(world.getGameName());
-            GraphicsController gc = new GraphicsController(model, frame);
+            new GraphicsController(model, frame);
 
             String playerName = frame.promptInput("Welcome", "Enter your name:");
             if (playerName == null || playerName.isBlank()) {
@@ -117,17 +119,14 @@ public class GameEngineApp {
 
       case "-batch":
         if (args.length == 3) {
-          new GameEngineApp(
-                  filename,
-                  new FileReader(args[2]),
-                  System.out
-          ).start();
+          try (FileReader batchInput = new FileReader(args[2])) {
+            new GameEngineApp(filename, batchInput, System.out).start();
+          }
         } else if (args.length == 4) {
-          new GameEngineApp(
-                  filename,
-                  new FileReader(args[2]),
-                  new FileWriter(args[3])
-          ).start();
+          try (FileReader batchInput = new FileReader(args[2]);
+               FileWriter batchOutput = new FileWriter(args[3])) {
+            new GameEngineApp(filename, batchInput, batchOutput).start();
+          }
         } else {
           System.out.println("Usage: -batch <source> [target]");
         }
