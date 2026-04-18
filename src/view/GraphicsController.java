@@ -53,15 +53,21 @@ public class GraphicsController implements ViewListener{
   }
 
   /**
-   * Called when the player clicks a direction button.
+   * Called when the player clicks a direction button. Successful moves refresh the view silently;
+   * blocked moves (walls, locked puzzle / monster rooms) surface the blocking message in a dialog.
    *
    * @param direction one of "N", "S", "E", "W"
    */
   @Override
   public void onMove(String direction) {
+    Room before = model.getCurrentRoom();
     String result = model.move(direction);
-    view.showMessage("", result);
+    Room after = model.getCurrentRoom();
+    if (before == after) {
+      view.showMessage("Move", result);
+    }
     refreshView();
+    checkGameOver();
   }
 
   /**
@@ -114,6 +120,7 @@ public class GraphicsController implements ViewListener{
     String result = model.answerPuzzle(answer);
     view.showMessage("Answer", result);
     refreshView();
+    checkGameOver();
   }
 
   /**
@@ -154,7 +161,14 @@ public class GraphicsController implements ViewListener{
     String message = model.useItem(selected);
     view.showMessage(selected, message);
     refreshView();
+    checkGameOver();
+  }
 
+  /**
+   * If the player has run out of health, shows the Game Over dialog. Called after any action that
+   * may take damage ({@code onMove}, {@code onAnswer}, {@code onUse}).
+   */
+  private void checkGameOver() {
     if (model.isGameOver()) {
       view.showGameOver(
           model.getPlayer().getName(),
@@ -162,7 +176,6 @@ public class GraphicsController implements ViewListener{
           "nighty_night.png"
       );
     }
-
   }
 
   /**

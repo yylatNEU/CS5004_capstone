@@ -31,14 +31,18 @@ class GraphicsControllerTest {
   // ---------- onMove ----------
 
   @Test
-  void onMoveShowsResult() {
+  void onMoveSuccessStaysSilentButRefreshes() {
+    view.lastTitle = "UNTOUCHED";
+    view.lastMessage = "UNTOUCHED";
     controller.onMove("E");
-    assertTrue(view.lastMessage.contains("SECOND ROOM"));
+    assertEquals("UNTOUCHED", view.lastTitle);
+    assertTrue(view.lastDescription.contains("SECOND ROOM"));
   }
 
   @Test
   void onMoveWallShowsBlockedMessage() {
     controller.onMove("N");
+    assertEquals("Move", view.lastTitle);
     assertTrue(view.lastMessage.contains("wall"));
   }
 
@@ -48,6 +52,12 @@ class GraphicsControllerTest {
     assertTrue(view.lastDescription.contains("SECOND ROOM"));
     assertEquals(0, view.lastInventory.size());
     assertNotNull(view.lastHealthStatus);
+  }
+
+  @Test
+  void onMoveDoesNotTriggerGameOverWhenAlive() {
+    controller.onMove("E");
+    assertEquals(0, view.gameOverShownCount);
   }
 
   // ---------- onTake ----------
@@ -118,6 +128,13 @@ class GraphicsControllerTest {
     controller.onAnswer();
     assertEquals("Answer", view.lastTitle);
     assertTrue(view.lastMessage.contains("no active puzzle"));
+  }
+
+  @Test
+  void onAnswerDoesNotTriggerGameOverWhenAlive() {
+    view.promptInputResult = "anything";
+    controller.onAnswer();
+    assertEquals(0, view.gameOverShownCount);
   }
 
   @Test
