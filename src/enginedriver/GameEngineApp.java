@@ -79,7 +79,7 @@ public class GameEngineApp {
    */
   public static void main(String[] args) throws IOException {
     if (args.length < 2) {
-      System.out.println("Usage: java -jar game_engine.jar <filename> -text|-graphics|-batch [source] [target]");
+      printUsageError();
       return;
     }
 
@@ -88,14 +88,18 @@ public class GameEngineApp {
 
     switch (mode) {
       case "-text":
-        new GameEngineApp(
-                filename,
-                new InputStreamReader(System.in),
-                System.out
-        ).start();
+        if (args.length != 2) {
+          printUsageError();
+          return;
+        }
+        new GameEngineApp(filename, new InputStreamReader(System.in), System.out).start();
         break;
 
       case "-graphics":
+        if (args.length != 2) {
+          printUsageError();
+          return;
+        }
         SwingUtilities.invokeLater(() -> {
           try {
             JsonGameLoader loader = new JsonGameLoader();
@@ -120,12 +124,25 @@ public class GameEngineApp {
             new GameEngineApp(filename, batchInput, batchOutput).start();
           }
         } else {
-          System.out.println("Usage: -batch <source> [target]");
+          printUsageError();
         }
         break;
 
       default:
-        System.out.println("Unknown mode: " + mode);
+        printUsageError();
     }
+  }
+
+  /**
+   * Prints the usage error message required by the HW9 command-line spec. Used whenever the
+   * argument pattern doesn't match any of the four supported formats.
+   */
+  private static void printUsageError() {
+    System.out.println("Incorrect command-line format for game engine.");
+    System.out.println("Formats allowed:");
+    System.out.println("game_engine <filename> -text");
+    System.out.println("game_engine <filename> -graphics");
+    System.out.println("game_engine <filename> -batch <source file>");
+    System.out.println("game_engine <filename> -batch <source file> <target file>");
   }
 }
