@@ -102,15 +102,7 @@ public class GameEngineApp {
             GameWorld world = loader.load(filename);
             IGameModel model = new GameModel(world);
             MainFrame frame = new MainFrame(world.getGameName());
-            new GraphicsController(model, frame);
-
-            String playerName = frame.promptInput("Welcome", "Enter your name:");
-            if (playerName == null || playerName.isBlank()) {
-              playerName = "Player";
-            }
-            model.setPlayerName(playerName);
-
-            frame.display();
+            new GraphicsController(model, frame).start();
           } catch (IOException e) {
             System.err.println("Failed to load game: " + e.getMessage());
           }

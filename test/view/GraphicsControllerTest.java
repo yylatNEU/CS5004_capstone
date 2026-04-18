@@ -248,6 +248,35 @@ class GraphicsControllerTest {
     assertTrue(view.disposed);
   }
 
+  // ---------- start() ----------
+
+  @Test
+  void startPromptsNameRefreshesAndDisplays() {
+    IGameModel freshModel = new GameModel(TestWorldFactory.createSimpleWorld());
+    StubView freshView = new StubView();
+    GraphicsController freshController = new GraphicsController(freshModel, freshView);
+    freshView.promptInputResult = "Alice";
+
+    freshController.start();
+
+    assertTrue(freshView.lastDescription.contains("START ROOM"));
+    assertNotNull(freshView.lastHealthStatus);
+    assertEquals(1, freshView.displayedCount);
+  }
+
+  @Test
+  void startDefaultsToPlayerWhenNameBlank() {
+    IGameModel freshModel = new GameModel(TestWorldFactory.createSimpleWorld());
+    StubView freshView = new StubView();
+    GraphicsController freshController = new GraphicsController(freshModel, freshView);
+    freshView.promptInputResult = "   ";
+
+    freshController.start();
+
+    assertTrue(freshView.lastDescription.contains("START ROOM"));
+    assertEquals(1, freshView.displayedCount);
+  }
+
   // ---------- Stub view ----------
 
   static class StubView implements IGameView {
@@ -274,6 +303,8 @@ class GraphicsControllerTest {
     String lastGameOverName;
     int lastGameOverScore;
     String lastGameOverImage;
+
+    int displayedCount = 0;
 
     @Override public void setListener(ViewListener l) {}
     @Override public void updateRoomImage(String p) { lastRoomImage = p; }
@@ -308,7 +339,7 @@ class GraphicsControllerTest {
       lastAboutImage = imagePath;
     }
     @Override public String getSelectedInventoryItem() { return null; }
-    @Override public void display() {}
+    @Override public void display() { displayedCount++; }
     @Override public void dispose() { disposed = true; }
   }
 }

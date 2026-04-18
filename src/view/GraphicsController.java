@@ -17,6 +17,21 @@ public class GraphicsController implements ViewListener{
   }
 
   /**
+   * Prompts the player for a name, renders the initial view state, and makes the window visible.
+   * Call this once after constructing the controller. Splitting this from the constructor keeps
+   * unit tests free of modal dialogs.
+   */
+  public void start() {
+    String playerName = view.promptInput("Welcome", "Enter your name:");
+    if (playerName == null || playerName.isBlank()) {
+      playerName = "Player";
+    }
+    model.setPlayerName(playerName);
+    refreshView();
+    view.display();
+  }
+
+  /**
    * Refreshes all view components to reflect the current game state.
    * Updates the room image, description, navigation buttons,
    * health status, and inventory display.
