@@ -1,13 +1,13 @@
-# CS5004 HW8 — Data-Driven Adventure Game Engine
+# CS5004 HW9 — Adventure Game Engine with Swing GUI
 
-**Team:** NO BUG  
+**Team:** NO BUG
 **Members:** Yu Chen, MinHsun Hsieh, Ying-Lou Lu, Yenyu Liu, Shelly (Beiyi) Xu
 
 ---
 
 ## UML Models & Written Scenarios
 
-See [HW8_UML models & Written Scenarios.pdf](HW8_UML%20models%20%26%20Written%20Scenarios.pdf) for the refined UML class diagram, object diagrams, sequence diagrams, and written scenarios.
+See `HW9_UML models.pdf` for the updated UML class diagram, object diagrams, sequence diagrams, and written scenarios for the HW9 (MVC + Graphics) design.
 
 ---
 
@@ -15,18 +15,32 @@ See [HW8_UML models & Written Scenarios.pdf](HW8_UML%20models%20%26%20Written%20
 
 1. Open the project in IntelliJ IDEA.
 2. Ensure `lib/json-20251224.jar` is on the classpath (Project Structure → Libraries).
-3. Run `GameEngineApp.main()` in `src/enginedriver/`.
-4. The default game file is `./resources/alignquest.json`.
+3. Run `enginedriver.GameEngineApp` with command-line arguments:
+
+```
+java -jar game_engine.jar <gameFile> -text
+java -jar game_engine.jar <gameFile> -graphics
+java -jar game_engine.jar <gameFile> -batch <sourceFile> [targetFile]
+```
+
+- `-text` — console mode (read from `System.in`, write to `System.out`).
+- `-graphics` — Swing GUI mode (window is launched on the Swing Event Dispatch Thread).
+- `-batch <src> [tgt]` — reads commands from `src`; if `tgt` is provided, output is written to it, otherwise output goes to `System.out`.
+
+Default game files live in `resources/` (`alignquest.json`, `museum.json`, `simple_hallway.json`, `empty_rooms.json`).
 
 ---
 
 ## Design Overview
 
-The system follows the **Model-View-Controller (MVC)** pattern with three layers:
+The system follows the **Model-View-Controller (MVC)** pattern with four layers:
 
-- **Engine Driver** (`GameEngineApp`) — application entry point; loads the JSON game file, wires the model and controller, and starts the game loop.
-- **Controller** (`GameController`) — reads user input from a `Readable`, dispatches commands to the model via the `IGameModel` interface, and writes output to an `Appendable`. The controller has no knowledge of concrete model classes.
-- **Model** (`GameModel` + domain classes) — owns all game state and enforces gameplay rules. Returns `String` messages to the controller; performs no I/O.
+- **Engine Driver** (`GameEngineApp`) — application entry point; parses the mode flag, loads the JSON game file, wires the model, view (if any), and controller, and hands off control.
+- **Controllers** — two interchangeable controllers behind the same `IGameModel` contract:
+  - `GameController` drives the **text / batch** loop (reads from a `Readable`, writes to an `Appendable`).
+  - `GraphicsController` drives the **Swing GUI**; it implements `ViewListener` to receive events from the View and calls `IGameView` methods to refresh the display after each model change.
+- **View** (`IGameView` + `MainFrame` + panels) — purely presentational Swing layer. Holds no game state; every gesture is forwarded through `ViewListener` and every update arrives through `IGameView`.
+- **Model** (`GameModel` + domain classes) — owns all game state and enforces gameplay rules. Returns `String` messages and exposes read-only query methods for the graphics layer; performs no I/O.
 
 ---
 
@@ -36,28 +50,46 @@ The system follows the **Model-View-Controller (MVC)** pattern with three layers
 
 | Class | Purpose |
 |-------|---------|
-| `GameEngineApp` | Entry point. Loads JSON, creates model and controller, starts the game loop. |
+| `GameEngineApp` | Entry point. Dispatches to `-text`, `-graphics`, or `-batch` mode; loads JSON, wires model / view / controller, and starts the appropriate loop. |
 
 ### controller
 
 | Class | Purpose |
 |-------|---------|
-| `GameController` | Console game loop. Parses commands (move, look, take, drop, use, examine, answer, save, restore, quit) and delegates to `IGameModel`. |
+| `GameController` | Console / batch game loop. Parses commands (move, look, take, drop, use, examine, answer, save, restore, quit) and delegates to `IGameModel`. |
+
+### view
+
+| Class / Interface | Purpose |
+|-------------------|---------|
+| `IGameView` | Interface describing every update and prompt the Controller needs from the View (update room image / description / nav buttons / health / inventory, show message / inspect / about / game-over, prompt input / selection). |
+| `ViewListener` | Callback interface implemented by the Controller; the View calls these methods when the user clicks buttons or selects menu items. |
+| `GraphicsController` | Implements `ViewListener`. Mediates between user events and `IGameModel`, refreshing the View and checking for game-over after each action. |
+| `MainFrame` | Swing `JFrame` implementing `IGameView`. Hosts a 2×2 layout of panels and a File menu (About / Save / Restore / Exit). |
+| `ViewPanel` | Top-left panel — renders the current room / monster / puzzle image. |
+| `NavigationPanel` | Top-right panel — directional buttons (N/S/E/W) and action buttons (Take, Examine, Answer). |
+| `DescriptionPanel` | Bottom-left panel — scrollable narrative text for the current room. |
+| `InventoryPanel` | Bottom-right panel — inventory list, health status, and inventory actions (Inspect, Use, Drop). |
+| `ModalDialogs` | Shared helpers for themed message / confirm / input / content dialogs. |
+| `ImageUtils` | Loads and scales images from `resources/images/` (with safe fallbacks). |
+| `RoundedButton` | Custom rounded Swing button used across the panels. |
+| `TeamUiTheme` | Centralized colors, fonts, borders, and menu-highlight theming. |
+| `GradientOutlineBorder` | Reusable gradient outline border used by panels and dialogs. |
 
 ### model
 
 | Class / Interface | Purpose |
 |-------------------|---------|
-| `IGameModel` | Interface defining the controller-facing contract. Decouples the controller from all concrete model classes. |
+| `IGameModel` | Controller-facing contract. Exposes action methods (`move`, `look`, `takeItem`, `dropItem`, `useItem`, `examine`, `answerPuzzle`, `save`, `restore`) and view-facing queries (`getInventoryItemNames`, `getRoomItemNames`, `getExaminableNames`, `getItemImage`, `getCurrentRoomImage`, `getGameName`, `setPlayerName`). |
 | `GameModel` | Implements `IGameModel`. Orchestrates movement, combat, puzzle solving, inventory management, scoring, and save/restore. |
 | `GameWorld` | Centralized registry of all `Room`, `Item`, `Fixture`, `Puzzle`, and `Monster` objects loaded from JSON. |
 | `JsonGameLoader` | Parses a JSON game file and constructs the `GameWorld`. Enables data-driven game creation. |
-| `GameSaveManager` | Serializes/deserializes mutable game state (player stats, inventory, puzzle/monster status, room exits) to `savegame.json`. |
+| `GameSaveManager` | Serializes/deserializes mutable game state (player stats, inventory, item usage, puzzle/monster status, room exits) to `savegame.json`. |
 | `Player` | Tracks player name, health (0–100), score, current room number, and inventory. |
-| `Inventory` | Manages collected items with a weight limit of 13. Supports add, remove, and lookup. |
-| `Room` | Represents a location. Contains directional exits, items, fixtures, an optional puzzle, and an optional monster. |
+| `Inventory` | Manages collected items with a weight limit of 13. |
+| `Room` | A location with directional exits, items, fixtures, an optional puzzle, and an optional monster. |
 | `Item` | A collectible object with limited uses, weight, value, and descriptive text. |
-| `Fixture` | A heavy, immovable object (e.g. desk, bookshelf) that can be examined but not picked up. |
+| `Fixture` | An immovable object (e.g. desk, bookshelf) that can be examined but not picked up. |
 | `Puzzle` | Gates blocked exits. Solved via a text answer or by using a specific item. Awards score on completion. |
 | `Monster` | Blocks exits and attacks on movement. Defeated by using the correct item. Awards score on defeat. |
 | `Direction` | Enum (`NORTH`, `SOUTH`, `EAST`, `WEST`) with string parsing. |
@@ -65,23 +97,23 @@ The system follows the **Model-View-Controller (MVC)** pattern with three layers
 
 ---
 
-## Design Evolution from HW7
+## Design Evolution from HW8
 
-HW7 was a pure analysis phase — UML diagrams and written scenarios describing a proposed design. HW8 is the working implementation. The key changes are:
+HW8 delivered a text-only MVC engine. HW9 keeps the Model essentially intact and layers a full graphical front-end on top without disturbing the existing controller or domain classes.
 
-1. **Architecture: single GameEngine → MVC.** HW7 proposed a monolithic `GameEngine` class. HW8 separates responsibilities into `GameEngineApp` (bootstrap), `GameController` (I/O), and `GameModel` (logic), connected through the `IGameModel` interface.
+1. **New View layer.** Added the `IGameView` interface and a Swing implementation (`MainFrame`) assembled from four quadrant panels (`ViewPanel`, `NavigationPanel`, `DescriptionPanel`, `InventoryPanel`) plus supporting UI utilities (`ModalDialogs`, `ImageUtils`, `RoundedButton`, `TeamUiTheme`, `GradientOutlineBorder`). The View owns no game state.
 
-2. **Combat: Battle class → inline monster attacks.** HW7 designed a standalone `Battle` class with turn-based combat. In implementation, monsters attack the player automatically on move attempts, and the player defeats monsters by using the correct item. A separate Battle class was unnecessary for this interaction model.
+2. **New Graphics Controller.** `GraphicsController` implements a new `ViewListener` callback interface. User gestures flow View → Controller via `ViewListener`; display updates flow Controller → View via `IGameView`. The text `GameController` is unchanged, proving that `IGameModel` is UI-agnostic.
 
-3. **Puzzles: password collection → text answers and item usage.** HW7 envisioned collecting clue fragments to assemble a password. HW8 puzzles are solved directly by typing a text answer or by using a specific item, driven by the JSON data.
+3. **Model extended with view-facing queries.** `IGameModel` gained read-only accessors (`getInventoryItemNames`, `getRoomItemNames`, `getExaminableNames`, `getItemImage`, `getCurrentRoomImage`, `getGameName`, `setPlayerName`) so the GUI can render lists and images without the View or Controller touching concrete model classes. The Model still performs no I/O.
 
-4. **Economy: Store / ItemToPurchase removed.** HW7 included an in-game store. This was not required by the game data specification, so it was removed to keep the design focused.
+4. **Per-entity images.** `Item`, `Fixture`, `Puzzle`, `Monster`, and `Room` may carry an optional picture filename. The Model resolves the current room's image in priority order: active monster → active puzzle → room default.
 
-5. **Map / Tile system → room-number connections.** HW7 proposed a `Map` class with a tile-based grid. HW8 connects rooms via directional exit values (positive = passable, 0 = wall, negative = blocked), which matches the JSON data format directly.
+5. **Three run modes.** `GameEngineApp` now parses a mode flag: `-text` (console), `-graphics` (Swing GUI on the EDT via `SwingUtilities.invokeLater`), and `-batch <source> [target]` (scripted input from a file, optional output to another file).
 
-6. **Player attributes simplified.** HW7 included EXP, level, strength, and coin. HW8 uses health, score, and inventory — sufficient for the game scenarios provided.
+6. **GUI-oriented interactions.** The GUI offers dialog-based selection for Take / Drop / Use / Inspect / Examine / Answer, a File menu with Save / Restore / About / Exit, a dedicated Game-Over dialog shown centrally from the controller, and dimmed direction buttons for non-passable exits (blocked exits still surface the model's message on click).
 
-7. **New components added.** `JsonGameLoader` (data-driven loading), `GameSaveManager` (persistence), `HealthStatus` (health categorization), and `Direction` (enum with parsing) were introduced during implementation to support required functionality.
+7. **Tests extended.** Added `GraphicsControllerTest` (with an `IGameView` stub) under `test/view/` to verify controller↔view interactions without launching a real window.
 
 ---
 
@@ -91,12 +123,17 @@ HW7 was a pure analysis phase — UML diagrams and written scenarios describing 
 src/
   enginedriver/    GameEngineApp.java
   controller/      GameController.java
+  view/            IGameView, ViewListener, GraphicsController, MainFrame,
+                   ViewPanel, NavigationPanel, DescriptionPanel, InventoryPanel,
+                   ModalDialogs, ImageUtils, RoundedButton, TeamUiTheme,
+                   GradientOutlineBorder
   model/           IGameModel, GameModel, GameWorld, JsonGameLoader,
                    GameSaveManager, Player, Inventory, Room, Item,
                    Fixture, Puzzle, Monster, Direction, HealthStatus
 test/
   model/           Unit tests for all model classes + TestWorldFactory
-Resources/         JSON game data files
+  view/            GraphicsControllerTest (with IGameView stub)
+resources/         JSON game data + images/ (room / item / monster / puzzle art)
 lib/               json-20251224.jar
 ```
 
@@ -106,3 +143,4 @@ lib/               json-20251224.jar
 
 - `json-20251224.jar` — JSON parsing (included in `lib/`).
 - JUnit 5 — unit testing (test scope only).
+- Java Swing / AWT — GUI (JDK standard library).
