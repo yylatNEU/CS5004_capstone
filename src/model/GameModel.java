@@ -11,6 +11,14 @@ public class GameModel implements IGameModel {
   private static final int RANK_SILVER = 250;
   private static final int RANK_BRONZE = 100;
 
+  /** Pseudo-examinable name that represents the player themselves. */
+  private static final String SELF_NAME = "Me";
+  /** Image shown when the player examines themselves. */
+  private static final String SELF_PICTURE = "epic_adventurer.png";
+  /** Flavor text appended after the player's own name when they examine "Me". */
+  private static final String SELF_FLAVOR =
+      ". I know you! You are a fearless adventurer embarking on an amazing quest.";
+
   private final GameWorld world;
   private final GameSaveManager saveManager;
   private Player player;
@@ -163,6 +171,10 @@ public class GameModel implements IGameModel {
 
   @Override
   public String examine(String name) {
+    if (name != null && name.equalsIgnoreCase(SELF_NAME) && player != null) {
+      return player.getName() + SELF_FLAVOR;
+    }
+
     Item inventoryItem = player.getInventory().getItem(name);
     if (inventoryItem != null) {
       return inventoryItem.getName() + ": " + inventoryItem.getDescription();
@@ -316,7 +328,9 @@ public class GameModel implements IGameModel {
   }
 
   /**
-   * Returns the names of all objects the player can examine in the current room.
+   * Returns the names of all objects the player can examine in the current room. The player
+   * themselves is always included as {@code "Me"} so they can inspect their own description and
+   * avatar even in an otherwise empty room.
    *
    * @return a list of examinable object names, never {@code null}
    */
@@ -324,14 +338,16 @@ public class GameModel implements IGameModel {
   public List<String> getExaminableNames() {
     List<String> names = new ArrayList<>();
     Room room = getCurrentRoom();
-    if (room == null) {
-      return names;
+    if (room != null) {
+      for (Item item : room.getItems()) {
+        names.add(item.getName());
+      }
+      for (Fixture fixture : room.getFixtures()) {
+        names.add(fixture.getName());
+      }
     }
-    for (Item item : room.getItems()) {
-      names.add(item.getName());
-    }
-    for (Fixture fixture : room.getFixtures()) {
-      names.add(fixture.getName());
+    if (player != null) {
+      names.add(SELF_NAME);
     }
     return names;
   }
@@ -342,9 +358,29 @@ public class GameModel implements IGameModel {
    * @return the picture file name.
    */
   @Override
+  public String getCurrentRoomImage() {
+    Room room = getCurrentRoom();
+    if (room == null) {
+      return null;
+    }
+    Monster monster = room.getMonster();
+    if (monster != null && monster.isActive() && monster.getPicture() != null) {
+      return monster.getPicture();
+    }
+    Puzzle puzzle = room.getPuzzle();
+    if (puzzle != null && puzzle.isActive() && puzzle.getPicture() != null) {
+      return puzzle.getPicture();
+    }
+    return room.getPicture();
+  }
+
+  @Override
   public String getItemImage(String itemName) {
     if (itemName == null || player == null) {
       return null;
+    }
+    if (itemName.equalsIgnoreCase(SELF_NAME)) {
+      return SELF_PICTURE;
     }
 
     Item inventoryItem = player.getInventory().getItem(itemName);

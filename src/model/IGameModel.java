@@ -150,4 +150,18 @@ public interface IGameModel {
    * @return the picture file name.
    */
   String getItemImage(String itemName);
+
+  /**
+   * Returns the image filename the view should display for the player's current room, taking any
+   * active monster or puzzle into account. Resolution order:
+   *
+   * <ol>
+   *   <li>If the current room has an active monster with a picture, that picture is returned.
+   *   <li>Otherwise, if the room has an active puzzle with a picture, that picture is returned.
+   *   <li>Otherwise, the room's own picture is returned (may be {@code null}).
+   * </ol>
+   *
+   * @return the picture filename, or {@code null} if nothing has one
+   */
+  String getCurrentRoomImage();
 }

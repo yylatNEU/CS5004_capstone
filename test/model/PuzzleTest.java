@@ -2,6 +2,7 @@ package model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -51,5 +52,29 @@ class PuzzleTest {
 
     assertFalse(puzzle.isActive());
     assertEquals("LOCK", puzzle.toString());
+  }
+
+  @Test
+  void pictureDefaultsToNullWhenLegacyConstructorUsed() {
+    Puzzle puzzle =
+        new Puzzle("Lock", true, true, false, "Key", 50, "A lock.", "Blocked.", "1:Hall");
+    assertNull(puzzle.getPicture());
+  }
+
+  @Test
+  void pictureIsExposedWhenProvidedToFullConstructor() {
+    Puzzle puzzle =
+        new Puzzle(
+            "DARKNESS",
+            true,
+            true,
+            true,
+            "Lamp",
+            150,
+            "Darkness! You cannot see!",
+            "It's dark!",
+            "6:Kitchen",
+            "darkness.png");
+    assertEquals("darkness.png", puzzle.getPicture());
   }
 }

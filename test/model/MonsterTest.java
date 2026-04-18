@@ -54,4 +54,29 @@ class MonsterTest {
   void toStringUppercasesName() {
     assertEquals("ROBOT", monster.toString());
   }
+
+  @Test
+  void pictureDefaultsToNullWhenLegacyConstructorUsed() {
+    assertEquals(null, monster.getPicture());
+  }
+
+  @Test
+  void pictureIsExposedWhenProvidedToFullConstructor() {
+    Monster withPicture =
+        new Monster(
+            "Teddy Bear",
+            true,
+            true,
+            true,
+            "Hair Clippers",
+            200,
+            "A peaceful teddy bear.",
+            "A monster Teddy Bear growls at you!",
+            -5,
+            "3:Foyer",
+            true,
+            "hits you with soft, fluffy paws!",
+            "monster-teddy.png");
+    assertEquals("monster-teddy.png", withPicture.getPicture());
+  }
 }

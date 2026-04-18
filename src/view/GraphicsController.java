@@ -39,7 +39,7 @@ public class GraphicsController implements ViewListener{
   private void refreshView() {
     Room room = model.getCurrentRoom();
     view.updateDescription(model.look());
-    view.updateRoomImage(room.getPicture());
+    view.updateRoomImage(model.getCurrentRoomImage());
     view.updateNavigationButtons(
         room.getExit(Direction.NORTH) != 0,
         room.getExit(Direction.SOUTH) != 0,
@@ -91,7 +91,9 @@ public class GraphicsController implements ViewListener{
   }
 
   /**
-   * Called when the player clicks the Examine button.
+   * Called when the player clicks the Examine button. If the player picks {@code "Me"} (inspecting
+   * themselves), the richer inspect dialog is shown so the avatar image appears alongside the
+   * description; regular items and fixtures use the simpler message dialog.
    */
   @Override
   public void onExamine() {
@@ -106,7 +108,11 @@ public class GraphicsController implements ViewListener{
     if (selected == null) return;  // Player cancels
 
     String info = model.examine(selected);
-    view.showMessage(selected, info);
+    if ("Me".equalsIgnoreCase(selected)) {
+      view.showInspectDialog("Inspecting...", info, model.getItemImage(selected));
+    } else {
+      view.showMessage(selected, info);
+    }
   }
 
   /**
@@ -227,10 +233,17 @@ public class GraphicsController implements ViewListener{
   }
 
   /**
-   * Called when the player selects File > Exit or closes the window.
+   * Called when the player selects File > Exit or closes the window. Shows the same end-of-game
+   * status dialog as {@link #checkGameOver()} (player name, final score, "Nighty Night" image)
+   * before disposing the window, so a voluntary quit still gives the player a scored send-off.
    */
   @Override
   public void onExit() {
+    view.showGameOver(
+        model.getPlayer().getName(),
+        model.getPlayer().getScore(),
+        "nighty_night.png"
+    );
     view.dispose();
   }
 }

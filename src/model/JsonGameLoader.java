@@ -135,7 +135,8 @@ public class JsonGameLoader {
                 getInt(o, "value", 0),
                 getString(o, "description", "No description available."),
                 getString(o, "effects", "Something is blocking you."),
-                getString(o, "target", ""));
+                getString(o, "target", ""),
+                getString(o, "picture", null));
         world.addPuzzle(puzzle);
       } catch (Exception e) {
         System.err.println("Warning: skipping malformed puzzle at index " + i);
@@ -175,7 +176,8 @@ public class JsonGameLoader {
                 getInt(o, "damage", 0),
                 getString(o, "target", ""),
                 getBoolean(o, "can_attack", false),
-                getString(o, "attack", ""));
+                getString(o, "attack", ""),
+                getString(o, "picture", null));
         world.addMonster(monster);
       } catch (Exception e) {
         System.err.println("Warning: skipping malformed monster at index " + i);

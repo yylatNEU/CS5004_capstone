@@ -18,9 +18,12 @@ public class Monster {
   private final String target;
   private final boolean canAttack;
   private final String attack;
+  private final String picture;
 
   /**
-   * Constructs a Monster with the given attributes.
+   * Constructs a Monster without an associated picture. Delegates to the full constructor with
+   * {@code picture = null}; kept for backwards compatibility with older tests / fixtures that don't
+   * supply an image.
    *
    * @param name the name of this monster
    * @param active whether the monster is currently active
@@ -48,6 +51,41 @@ public class Monster {
       String target,
       boolean canAttack,
       String attack) {
+    this(name, active, affectsTarget, affectsPlayer, solution, value, description, effects,
+        damage, target, canAttack, attack, null);
+  }
+
+  /**
+   * Constructs a Monster with the given attributes.
+   *
+   * @param name the name of this monster
+   * @param active whether the monster is currently active
+   * @param affectsTarget whether the monster blocks a room exit
+   * @param affectsPlayer whether the monster can damage the player
+   * @param solution the name of the item required to defeat this monster
+   * @param value the score awarded when this monster is defeated
+   * @param description the text displayed when the monster is at rest
+   * @param effects the text displayed when the monster is active in a room
+   * @param damage the amount of health the monster removes per attack (negative value)
+   * @param target the room this monster affects, in "number:name" format
+   * @param canAttack whether this monster actively attacks the player on movement
+   * @param attack the text displayed when the monster attacks the player
+   * @param picture the filename of the monster's image (shown while active), or {@code null}
+   */
+  public Monster(
+      String name,
+      boolean active,
+      boolean affectsTarget,
+      boolean affectsPlayer,
+      String solution,
+      int value,
+      String description,
+      String effects,
+      int damage,
+      String target,
+      boolean canAttack,
+      String attack,
+      String picture) {
     this.name = name;
     this.active = active;
     this.affectsTarget = affectsTarget;
@@ -60,6 +98,7 @@ public class Monster {
     this.target = target;
     this.canAttack = canAttack;
     this.attack = attack;
+    this.picture = picture;
   }
 
   /**
@@ -172,6 +211,16 @@ public class Monster {
    */
   public String getAttack() {
     return attack;
+  }
+
+  /**
+   * Returns the monster's picture filename. This image is shown in the view while the monster is
+   * active, replacing the room's default picture.
+   *
+   * @return the picture filename, or {@code null} if none is set
+   */
+  public String getPicture() {
+    return picture;
   }
 
   /**

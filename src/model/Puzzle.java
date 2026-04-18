@@ -23,9 +23,12 @@ public class Puzzle {
   private final String description;
   private final String effects;
   private final String target;
+  private final String picture;
 
   /**
-   * Constructs a Puzzle with the given attributes.
+   * Constructs a Puzzle without an associated picture. Delegates to the full constructor with
+   * {@code picture = null}; kept for backwards compatibility with older tests / fixtures that
+   * don't supply an image.
    *
    * @param name the name of this puzzle
    * @param active whether the puzzle is currently active
@@ -47,6 +50,35 @@ public class Puzzle {
       String description,
       String effects,
       String target) {
+    this(name, active, affectsTarget, affectsPlayer, solution, value, description, effects,
+        target, null);
+  }
+
+  /**
+   * Constructs a Puzzle with the given attributes.
+   *
+   * @param name the name of this puzzle
+   * @param active whether the puzzle is currently active
+   * @param affectsTarget whether the puzzle blocks a room exit
+   * @param affectsPlayer whether the puzzle affects the player's health
+   * @param solution the solution string (item name or single-quoted text answer)
+   * @param value the score awarded when this puzzle is solved
+   * @param description the text displayed when the puzzle is examined
+   * @param effects the text displayed when the puzzle is active in a room
+   * @param target the room this puzzle affects, in "number:name" format
+   * @param picture the filename of the puzzle's image (shown while active), or {@code null}
+   */
+  public Puzzle(
+      String name,
+      boolean active,
+      boolean affectsTarget,
+      boolean affectsPlayer,
+      String solution,
+      int value,
+      String description,
+      String effects,
+      String target,
+      String picture) {
     this.name = name;
     this.active = active;
     this.affectsTarget = affectsTarget;
@@ -56,6 +88,7 @@ public class Puzzle {
     this.description = description;
     this.effects = effects;
     this.target = target;
+    this.picture = picture;
   }
 
   /**
@@ -140,6 +173,16 @@ public class Puzzle {
    */
   public String getTarget() {
     return target;
+  }
+
+  /**
+   * Returns the puzzle's picture filename. This image is shown in the view while the puzzle is
+   * active, replacing the room's default picture.
+   *
+   * @return the picture filename, or {@code null} if none is set
+   */
+  public String getPicture() {
+    return picture;
   }
 
   /**

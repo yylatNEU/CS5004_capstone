@@ -98,11 +98,32 @@ class GraphicsControllerTest {
   }
 
   @Test
-  void onExamineEmptyRoomShowsNothing() {
+  void onExamineEmptyRoomStillOffersMe() {
     model.move("E");
+    view.promptSelectionResult = null;
+    view.lastTitle = "UNTOUCHED";
     controller.onExamine();
-    assertEquals("Examine", view.lastTitle);
-    assertTrue(view.lastMessage.toLowerCase().contains("nothing"));
+    // "Me" is always examinable, so the picker is shown (not the "nothing here" message).
+    assertEquals("UNTOUCHED", view.lastTitle);
+  }
+
+  @Test
+  void onExamineMeShowsInspectDialogWithAdventurerImage() {
+    view.promptSelectionResult = "Me";
+    controller.onExamine();
+    assertEquals("Inspecting...", view.lastInspectTitle);
+    assertTrue(view.lastInspectDescription.contains("Tester"));
+    assertTrue(view.lastInspectDescription.toLowerCase().contains("fearless adventurer"));
+    assertEquals("epic_adventurer.png", view.lastInspectImage);
+  }
+
+  @Test
+  void onExamineItemUsesMessageNotInspectDialog() {
+    view.promptSelectionResult = "Key";
+    view.lastInspectTitle = "UNTOUCHED";
+    controller.onExamine();
+    assertEquals("Key", view.lastTitle);
+    assertEquals("UNTOUCHED", view.lastInspectTitle);
   }
 
   @Test
@@ -260,8 +281,11 @@ class GraphicsControllerTest {
   }
 
   @Test
-  void onExitDisposesView() {
+  void onExitShowsGameOverDialogThenDisposesView() {
     controller.onExit();
+    assertEquals(1, view.gameOverShownCount);
+    assertEquals("Tester", view.lastGameOverName);
+    assertEquals("nighty_night.png", view.lastGameOverImage);
     assertTrue(view.disposed);
   }
 
